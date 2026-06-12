@@ -23,18 +23,24 @@ import { DashboardView } from '@/components/views/DashboardView';
 import { ProductsView } from '@/components/views/ProductsView';
 import { ImportCostsView } from '@/components/views/ImportCostsView';
 import { SalesView } from '@/components/views/SalesView';
+import { BusinessCostsView } from '@/components/views/BusinessCostsView';
+import { DeliveriesView } from '@/components/views/DeliveriesView';
+import { StockFlowView } from '@/components/views/StockFlowView';
+import { DeliveryCostView } from '@/components/views/DeliveryCostView';
+import { ReportsView } from '@/components/views/ReportsView';
+import { SettingsView } from '@/components/views/SettingsView';
 
 const MENUS = [
-  { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-  { id: 'pedidos', label: 'Pedidos/Vendas', icon: ShoppingCart },
-  { id: 'entregas', label: 'Entregas', icon: Truck },
-  { id: 'produtos', label: 'Produtos/Custos', icon: Box },
-  { id: 'importar', label: 'Importar Custos', icon: UploadCloud },
-  { id: 'negocio', label: 'Custos do Negócio', icon: Wallet },
+  { id: 'dashboard', label: 'Dashboard Financeiro', icon: BarChart3 },
+  { id: 'pedidos', label: 'Pedidos e Vendas', icon: ShoppingCart },
+  { id: 'entregas', label: 'Logística de Entregas', icon: Truck },
+  { id: 'produtos', label: 'Produtos e Custos', icon: Box },
+  { id: 'importar', label: 'Importar Planilha (Massa)', icon: UploadCloud },
+  { id: 'negocio', label: 'Custos da Empresa', icon: Wallet },
   { id: 'estoque', label: 'Fluxo de Estoque', icon: ArrowRightLeft },
-  { id: 'custo_entrega', label: 'Custo com Entrega', icon: Map },
-  { id: 'relatorios', label: 'Relatórios', icon: FileText },
-  { id: 'equipe', label: 'Equipe/Ajustes', icon: Settings },
+  { id: 'custo_entrega', label: 'Auditoria de Fretes', icon: Map },
+  { id: 'relatorios', label: 'Relatórios Visuais', icon: FileText },
+  { id: 'equipe', label: 'Equipe e Configurações', icon: Settings },
 ];
 
 export default function SantaBronxOps() {
@@ -100,21 +106,53 @@ export default function SantaBronxOps() {
           
           <div className="flex items-center gap-4">
             {/* Store Selector */}
-            <div className="relative group cursor-pointer flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-neutral-900 border border-transparent hover:border-neutral-800 transition-colors">
-              <Store className="w-4 h-4 text-neutral-400" />
-              <span className="text-sm font-medium text-neutral-300">
-                {stores.find(s => s.id === selectedStore)?.name}
-              </span>
-              <ChevronDown className="w-3 h-3 text-neutral-500" />
+            <div className="relative group">
+              <button className="flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-neutral-900 border border-transparent hover:border-neutral-800 transition-colors cursor-pointer">
+                <Store className="w-4 h-4 text-neutral-400" />
+                <span className="text-sm font-medium text-neutral-300">
+                  {stores.find(s => s.id === selectedStore)?.name}
+                </span>
+                <ChevronDown className="w-3 h-3 text-neutral-500" />
+              </button>
+              <div className="absolute right-0 top-full mt-1 w-48 bg-neutral-900 border border-neutral-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden">
+                 {stores.map(store => (
+                   <div 
+                     key={store.id} 
+                     onClick={() => setSelectedStore(store.id)}
+                     className={cn(
+                       "px-4 py-2 text-sm cursor-pointer hover:bg-neutral-800 text-white",
+                       selectedStore === store.id ? "bg-neutral-800" : ""
+                     )}
+                   >
+                     {store.name}
+                   </div>
+                 ))}
+              </div>
             </div>
 
             {/* Date Filter */}
-            <div className="relative group cursor-pointer flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-neutral-900 border border-transparent hover:border-neutral-800 transition-colors">
-              <Calendar className="w-4 h-4 text-neutral-400" />
-              <span className="text-sm font-medium text-neutral-300">
-                {dateFilters.find(d => d.id === selectedDate)?.name}
-              </span>
-              <ChevronDown className="w-3 h-3 text-neutral-500" />
+            <div className="relative group">
+              <button className="flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-neutral-900 border border-transparent hover:border-neutral-800 transition-colors cursor-pointer">
+                <Calendar className="w-4 h-4 text-neutral-400" />
+                <span className="text-sm font-medium text-neutral-300">
+                  {dateFilters.find(d => d.id === selectedDate)?.name}
+                </span>
+                <ChevronDown className="w-3 h-3 text-neutral-500" />
+              </button>
+               <div className="absolute right-0 top-full mt-1 w-48 bg-neutral-900 border border-neutral-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden">
+                 {dateFilters.map(df => (
+                   <div 
+                     key={df.id} 
+                     onClick={() => setSelectedDate(df.id)}
+                     className={cn(
+                       "px-4 py-2 text-sm cursor-pointer hover:bg-neutral-800 text-white",
+                       selectedDate === df.id ? "bg-neutral-800" : ""
+                     )}
+                   >
+                     {df.name}
+                   </div>
+                 ))}
+              </div>
             </div>
             
             <div className="h-4 w-px bg-neutral-800 mx-2"></div>
@@ -133,26 +171,12 @@ export default function SantaBronxOps() {
             {activeMenu === 'pedidos' && <SalesView />}
             {activeMenu === 'produtos' && <ProductsView />}
             {activeMenu === 'importar' && <ImportCostsView />}
-            
-            {/* Fallback empty states for other tabs */}
-            {!['dashboard', 'pedidos', 'produtos', 'importar'].includes(activeMenu) && (
-              <div className="flex flex-col items-center justify-center p-12 text-center border border-dashed border-neutral-800 rounded-2xl bg-neutral-900/30">
-                <div className="w-12 h-12 bg-neutral-900 rounded-full flex items-center justify-center mb-4">
-                  {MENUS.find(m => m.id === activeMenu)?.icon && 
-                    // @ts-ignore
-                    (() => { const Icon = MENUS.find(m => m.id === activeMenu)?.icon; return <Icon className="w-6 h-6 text-neutral-500" />; })()
-                  }
-                </div>
-                <h3 className="text-lg font-medium text-white mb-2">Módulo em Desenvolvimento</h3>
-                <p className="text-sm text-neutral-400 max-w-sm mb-6">
-                  Esta área ainda não está conectada na fase atual do protótipo. 
-                  O modelo visual e relatórios estarão disponíveis na próxima etapa.
-                </p>
-                <button className="px-4 py-2 bg-white text-black font-medium text-sm rounded-lg hover:bg-neutral-200 transition-colors">
-                  Notificar quando estiver pronto
-                </button>
-              </div>
-            )}
+            {activeMenu === 'entregas' && <DeliveriesView />}
+            {activeMenu === 'negocio' && <BusinessCostsView />}
+            {activeMenu === 'estoque' && <StockFlowView />}
+            {activeMenu === 'custo_entrega' && <DeliveryCostView />}
+            {activeMenu === 'relatorios' && <ReportsView />}
+            {activeMenu === 'equipe' && <SettingsView />}
           </div>
         </div>
       </main>
