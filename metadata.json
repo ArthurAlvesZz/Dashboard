@@ -1,0 +1,6 @@
+{
+  "name": "Santa Bronx Ops",
+  "description": "Dashboard de gerenciamento operacional e financeiro da Santa Bronx.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
