@@ -1,12 +1,15 @@
 import { useState } from 'react';
+import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { mockProducts } from '@/lib/mockData';
 import { formatCurrency, cn } from '@/lib/utils';
 import { Search, AlertCircle, Plus, Filter, MoreHorizontal, Image as ImageIcon } from 'lucide-react';
 import { Drawer } from '@/components/ui/Drawer';
 
+type Product = typeof mockProducts[0];
+
 export function ProductsView() {
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   return (
     <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
@@ -52,10 +55,9 @@ export function ProductsView() {
                   <tr key={product.id} className="hover:bg-neutral-900/50 transition-colors group">
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-neutral-800 rounded-md overflow-hidden shrink-0 border border-neutral-700 flex items-center justify-center">
+                        <div className="w-10 h-10 bg-neutral-800 rounded-md overflow-hidden shrink-0 border border-neutral-700 flex items-center justify-center relative">
                           {product.image ? (
-                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={product.image} alt={product.name} className="w-full h-full object-cover opacity-80" />
+                            <Image src={product.image} alt={product.name} fill referrerPolicy="no-referrer" className="object-cover opacity-80" />
                           ) : (
                             <ImageIcon className="w-4 h-4 text-neutral-600" />
                           )}
@@ -127,9 +129,8 @@ export function ProductsView() {
         {selectedProduct && (
           <div className="space-y-6">
             <div className="flex items-center gap-4">
-              <div className="w-20 h-20 bg-neutral-900 border border-neutral-800 rounded-lg overflow-hidden shrink-0">
-                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={selectedProduct.image} alt={selectedProduct.name} className="w-full h-full object-cover" />
+              <div className="w-20 h-20 bg-neutral-900 border border-neutral-800 rounded-lg overflow-hidden shrink-0 relative">
+                <Image src={selectedProduct.image} alt={selectedProduct.name} fill referrerPolicy="no-referrer" className="object-cover" />
               </div>
               <div className="flex flex-col">
                 <span className="text-lg font-medium text-white">{selectedProduct.name}</span>

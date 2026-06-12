@@ -149,7 +149,7 @@ export function SalesView() {
                   Itens Faturados
                 </h3>
                 <div className="space-y-3">
-                  {selectedOrder.items.map((item: any, i: number) => (
+                  {selectedOrder.items.map((item: { sku: string; qty: number; price: number; cost: number }, i: number) => (
                     <div key={i} className="bg-neutral-900 border border-neutral-800 p-3 rounded-lg flex items-center justify-between">
                       <div className="flex flex-col">
                         <span className="text-sm font-medium text-neutral-200">{item.qty}x {item.sku}</span>

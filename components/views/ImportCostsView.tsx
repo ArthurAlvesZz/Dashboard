@@ -1,12 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { UploadCloud, FileSpreadsheet, CheckCircle2, AlertTriangle, ArrowRight, Info, Eye } from 'lucide-react';
+import { UploadCloud, FileSpreadsheet, CheckCircle2, AlertTriangle, ArrowRight, Info, Eye, LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Drawer } from '@/components/ui/Drawer';
 
 export function ImportCostsView() {
   const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
   const [showPreview, setShowPreview] = useState(false);
+
+  useEffect(() => {
+    if (step === 4) {
+      const timer = setTimeout(() => setStep(5), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [step]);
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto animate-in fade-in zoom-in-95 duration-300">
@@ -137,7 +144,6 @@ export function ImportCostsView() {
                   <div className="w-16 h-16 border-4 border-neutral-800 border-t-emerald-500 rounded-full animate-spin mb-6" />
                   <h3 className="text-xl font-medium text-white mb-2">Aplicando 414 Custos...</h3>
                   <p className="text-sm text-neutral-500">Isso pode levar alguns segundos.</p>
-                  {setTimeout(() => setStep(5), 1500) && null}
                 </>
               ) : (
                 <>
@@ -182,7 +188,7 @@ export function ImportCostsView() {
   );
 }
 
-function SummaryStat({ icon: Icon, label, value, color, sub }: any) {
+function SummaryStat({ icon: Icon, label, value, color, sub }: { icon: LucideIcon, label: string, value: string, color: string, sub?: string }) {
   return (
     <div className="bg-neutral-900 border border-neutral-800 p-4 rounded-xl flex flex-col gap-2">
       <div className="flex justify-between items-start">
