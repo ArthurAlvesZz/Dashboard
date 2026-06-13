@@ -49,7 +49,7 @@ export interface BusinessCost {
   store: string;
   storeId: string;
   value: number;
-  status: 'pago' | 'vencendo' | 'pendente' | 'em aberto' | 'atrasado';
+  status: 'pago' | 'vencendo' | 'pendente' | 'em aberto' | 'atrasado' | 'cancelado';
   recurrence: boolean;
 }
 
@@ -75,6 +75,8 @@ export interface Delivery {
   cost: number;
   deadline: string;
   status: string;
+  store: string;
+  storeId: string;
 }
 
 export interface StockEntry {
@@ -266,16 +268,16 @@ export const mockDeliveryCosts: DeliveryCost[] = generateDeliveryCosts();
 
 // ─── DELIVERIES (10 entregas) ───────────────────────────
 export const mockDeliveries: Delivery[] = [
-  { id: 'PED-1092', customer: 'João Silva', tracking: 'MB-493', carrier: 'Motoboy Zé', cost: 15.00, deadline: 'Hoje', status: 'entregue' },
-  { id: 'PED-1093', customer: 'Maria Oliveira', tracking: 'PQ123456789BR', carrier: 'Correios', cost: 35.00, deadline: 'Amanhã', status: 'em_transito' },
-  { id: 'PED-1094', customer: 'Carlos Mendes', tracking: 'LG987654321', carrier: 'Loggi', cost: 28.00, deadline: '2 dias', status: 'em_transito' },
-  { id: 'PED-1095', customer: 'Ana Julia', tracking: 'MB-495', carrier: 'Motoboy (A Definir)', cost: 0, deadline: 'Hoje', status: 'preparando' },
-  { id: 'PED-1096', customer: 'Pedro Santos', tracking: 'JD111222333', carrier: 'Jadlog', cost: 22.00, deadline: '3 dias', status: 'processando' },
-  { id: 'PED-1097', customer: 'Lucia Ferreira', tracking: 'MB-501', carrier: 'Motoboy Zé', cost: 18.00, deadline: 'Hoje', status: 'entregue' },
-  { id: 'PED-1098', customer: 'Roberto Lima', tracking: 'PQ987654321BR', carrier: 'Correios', cost: 42.00, deadline: 'Amanhã', status: 'em_transito' },
-  { id: 'PED-1099', customer: 'Fernanda Alves', tracking: 'TE444555666', carrier: 'Total Express', cost: 32.00, deadline: '2 dias', status: 'processando' },
-  { id: 'PED-1100', customer: 'Marcos Oliveira', tracking: 'MB-510', carrier: 'Motoboy Zé', cost: 12.00, deadline: 'Hoje', status: 'entregue' },
-  { id: 'PED-1101', customer: 'Patricia Souza', tracking: 'PQ111222333BR', carrier: 'Correios', cost: 38.00, deadline: '3 dias', status: 'preparando' },
+  { id: 'PED-1092', customer: 'João Silva', tracking: 'MB-493', carrier: 'Motoboy Zé', cost: 15.00, deadline: 'Hoje', status: 'entregue', store: 'Araguari', storeId: 'araguari' },
+  { id: 'PED-1093', customer: 'Maria Oliveira', tracking: 'PQ123456789BR', carrier: 'Correios', cost: 35.00, deadline: 'Amanhã', status: 'em_transito', store: 'Uberlândia', storeId: 'uberlandia' },
+  { id: 'PED-1094', customer: 'Carlos Mendes', tracking: 'LG987654321', carrier: 'Loggi', cost: 28.00, deadline: '2 dias', status: 'em_transito', store: 'Todas', storeId: 'all' },
+  { id: 'PED-1095', customer: 'Ana Julia', tracking: 'MB-495', carrier: 'Motoboy (A Definir)', cost: 0, deadline: 'Hoje', status: 'preparando', store: 'Araguari', storeId: 'araguari' },
+  { id: 'PED-1096', customer: 'Pedro Santos', tracking: 'JD111222333', carrier: 'Jadlog', cost: 22.00, deadline: '3 dias', status: 'processando', store: 'Uberlândia', storeId: 'uberlandia' },
+  { id: 'PED-1097', customer: 'Lucia Ferreira', tracking: 'MB-501', carrier: 'Motoboy Zé', cost: 18.00, deadline: 'Hoje', status: 'entregue', store: 'Araguari', storeId: 'araguari' },
+  { id: 'PED-1098', customer: 'Roberto Lima', tracking: 'PQ987654321BR', carrier: 'Correios', cost: 42.00, deadline: 'Amanhã', status: 'em_transito', store: 'Uberlândia', storeId: 'uberlandia' },
+  { id: 'PED-1099', customer: 'Fernanda Alves', tracking: 'TE444555666', carrier: 'Total Express', cost: 32.00, deadline: '2 dias', status: 'processando', store: 'Araguari', storeId: 'araguari' },
+  { id: 'PED-1100', customer: 'Marcos Oliveira', tracking: 'MB-510', carrier: 'Motoboy Zé', cost: 12.00, deadline: 'Hoje', status: 'entregue', store: 'Uberlândia', storeId: 'uberlandia' },
+  { id: 'PED-1101', customer: 'Patricia Souza', tracking: 'PQ111222333BR', carrier: 'Correios', cost: 38.00, deadline: '3 dias', status: 'preparando', store: 'Araguari', storeId: 'araguari' },
 ];
 
 // ─── MOCK DASHBOARD DATA ────────────────────────────────
@@ -305,6 +307,13 @@ export const mockDashboardData = {
   previsaoFaturamento: totalFaturamento * 1.2,
   lucro: totalLucro,
 };
+
+export const mockGoals = [
+  { name: 'Receita Líquida Mensal', current: mockDashboardData.receitaLiquida, target: 145000 },
+  { name: 'Custos Fixos', current: mockDashboardData.custosFixos, target: 12350 },
+  { name: 'CMV Mensal', current: mockDashboardData.custoProdutosVendidos, target: 48000 },
+  { name: 'Envios Realizados', current: mockDeliveries.length, target: 3500 },
+];
 
 // ─── MOCK CHART DATA ────────────────────────────────────
 export const mockChartData = [

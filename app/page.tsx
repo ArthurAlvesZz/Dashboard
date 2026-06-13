@@ -48,7 +48,7 @@ export default function Shell() {
   const [activeMenu, setActiveMenu] = useState(NAV_ITEMS[0].id);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { storeId, setStoreId, period, setPeriod } = useStore();
+  const { selectedStore, selectedDate, setSelectedStore, setSelectedDate } = useStore();
 
   const handleMenuChange = (id: string) => {
     setLoading(true);
@@ -106,16 +106,16 @@ export default function Shell() {
         <div className="sticky top-0 z-30 flex flex-col gap-4 border-b border-border bg-background/95 backdrop-blur px-4 py-4 md:flex-row md:items-center md:justify-between md:px-8">
           <div className="flex items-center space-x-4">
             <select
-              value={storeId}
-              onChange={(e) => setStoreId(e.target.value)}
+              value={selectedStore}
+              onChange={(e) => setSelectedStore(e.target.value)}
               className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
               {stores.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
 
             <select
-              value={period}
-              onChange={(e: any) => setPeriod(e.target.value)}
+              value={selectedDate}
+              onChange={(e: any) => setSelectedDate(e.target.value)}
               className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
               {dateFilters.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}

@@ -1,6 +1,6 @@
 'use client';
 import { useStore } from '@/contexts/StoreContext';
-import { mockSales, mockBusinessCosts, mockDeliveryCosts, mockProducts, mockChartData, filterByStore, filterByDate } from '@/lib/mockData';
+import { mockDashboardData, mockGoals, mockBusinessCosts, mockDeliveryCosts, mockProducts, mockChartData, filterByStore } from '@/lib/mockData';
 import { formatCurrency, getStatusColor, getStatusLabel } from '@/lib/utils';
 import { useState, useEffect, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
@@ -8,51 +8,35 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Drawer } from '@/components/ui/Drawer';
 import { ShoppingCart, TrendingUp, AlertCircle, TrendingDown, Package, Clock, Truck, ShieldAlert } from 'lucide-react';
 
+interface MetricCardProps {
+  title: string;
+  value: string;
+  subtitle: string;
+  icon: React.ReactNode;
+  iconColor: string;
+  valueColor?: string;
+  onClick: () => void;
+}
+
 export function DashboardView() {
-  const { storeId, getDateRange } = useStore();
-  const range = getDateRange();
-  const [drillDownData, setDrillDownData] = useState<any | null>(null);
+  const { selectedStore } = useStore();
+  const [drillDownData, setDrillDownData] = useState<{ title: string; data: any } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setIsLoading(true);
     const t = setTimeout(() => setIsLoading(false), 800);
     return () => clearTimeout(t);
-  }, [storeId, range]);
+  }, [selectedStore]);
 
-  // Filtrar dados por store e período
-  const filteredSales = useMemo(() =>
-    filterByDate(filterByStore(mockSales, storeId), range.from, range.to)
-  , [storeId, range]);
-
-  const filteredCosts = useMemo(() =>
-    filterByStore(mockBusinessCosts, storeId)
-  , [storeId]);
-
-  const filteredDeliveryCosts = useMemo(() =>
-    filterByStore(mockDeliveryCosts, storeId)
-  , [storeId]);
-
-  // Calcular métricas REAIS
-  const faturamentoMes = filteredSales.reduce((a, s) => a + s.total, 0);
-  const receitaLiquida = filteredSales.reduce((a, s) => a + s.netTotal, 0);
-  const custoProdutos = filteredSales.reduce((a, s) => a + s.productCost, 0);
-  const custosFixos = filteredCosts.filter(c => c.type === 'Fixo').reduce((a, c) => a + c.value, 0);
-  const custosVariaveis = filteredCosts.filter(c => c.type === 'Variável').reduce((a, c) => a + c.value, 0);
-  const custoEntrega = filteredDeliveryCosts.reduce((a, d) => a + d.realCost, 0);
-  const lucro = receitaLiquida - custoProdutos - custosFixos - custosVariaveis - custoEntrega;
-  const margemLucro = receitaLiquida > 0 ? (lucro / receitaLiquida) * 100 : 0;
-  const ticketMedio = filteredSales.length > 0 ? receitaLiquida / filteredSales.length : 0;
-  const clientesUnicos = new Set(filteredSales.map(s => s.customer)).size;
+  const filteredCosts = useMemo(() => filterByStore(mockBusinessCosts, selectedStore), [selectedStore]);
   const produtosSemCusto = mockProducts.filter(p => p.status === 'pendente').length;
-  const entregasSemCusto = filteredDeliveryCosts.filter(d => d.status === 'pendente').length;
-  const contasVencendo = filteredCosts.filter(c => c.status === 'vencendo' || c.status === 'atrasado').reduce((a, c) => a + c.value, 0);
+  const entregasSemCusto = mockDeliveryCosts.filter(d => d.status === 'pendente').length;
+  // E: Calcular dinamicamente a soma de mockBusinessCosts com status vencendo
+  const contasVencendoLocal = filteredCosts.filter(c => c.status === 'vencendo' || c.status === 'atrasado').reduce((a, c) => a + c.value, 0);
 
-  // Gráfico de barras reais
-  const chartData = mockChartData;
-
-  // Tabela de lançamentos recentes (últimas 10 vendas)
-  const recentSales = filteredSales.slice(0, 10);
+  // Filter transactions for recent list
+  const recentTransactions = [...filteredCosts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 10);
 
   if (isLoading) {
     return (
@@ -66,28 +50,28 @@ export function DashboardView() {
     <div className="space-y-6">
       {/* Resumo Financeiro */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="hover:border-primary/50 transition-colors cursor-pointer" onClick={() => setDrillDownData({ title: 'Faturamento Bruto', data: filteredSales })}>
+        <Card className="hover:border-primary/50 transition-colors cursor-pointer" onClick={() => setDrillDownData({ title: 'Faturamento Bruto', data: [] })}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Faturamento Bruto</CardTitle>
             <ShoppingCart className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(faturamentoMes)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(mockDashboardData.faturamentoMes)}</div>
             <p className="text-xs text-muted-foreground mt-1 text-emerald-500 flex items-center">
               <TrendingUp className="w-3 h-3 mr-1" /> Baseado no período
             </p>
           </CardContent>
         </Card>
         
-        <Card className="hover:border-primary/50 transition-colors cursor-pointer" onClick={() => setDrillDownData({ title: 'Receita Líquida', data: filteredSales })}>
+        <Card className="hover:border-primary/50 transition-colors cursor-pointer" onClick={() => setDrillDownData({ title: 'Receita Líquida', data: [] })}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Receita Líquida (pós taxas)</CardTitle>
             <TrendingUp className="h-4 w-4 text-emerald-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-emerald-500">{formatCurrency(receitaLiquida)}</div>
+            <div className="text-2xl font-bold text-emerald-500">{formatCurrency(mockDashboardData.receitaLiquida)}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Ticket Médio: {formatCurrency(ticketMedio)}
+              Ticket Médio: {formatCurrency(mockDashboardData.receitaLiquida / 50)}
             </p>
           </CardContent>
         </Card>
@@ -98,9 +82,9 @@ export function DashboardView() {
             <TrendingDown className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-destructive">{formatCurrency(custoProdutos + custosFixos + custosVariaveis + custoEntrega)}</div>
+            <div className="text-2xl font-bold text-destructive">{formatCurrency(mockDashboardData.custoProdutosVendidos + mockDashboardData.custosFixos + mockDashboardData.custosVariaveis + mockDashboardData.custoEntrega)}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Fixo: {formatCurrency(custosFixos)} | Prod: {formatCurrency(custoProdutos)}
+              Fixo: {formatCurrency(mockDashboardData.custosFixos)} | Prod: {formatCurrency(mockDashboardData.custoProdutosVendidos)}
             </p>
           </CardContent>
         </Card>
@@ -111,16 +95,16 @@ export function DashboardView() {
             <AlertCircle className="h-4 w-4 text-primary-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(lucro)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(mockDashboardData.lucro)}</div>
             <p className="text-xs text-primary-foreground/80 mt-1">
-              Margem de {margemLucro.toFixed(1)}%
+              Margem de {(mockDashboardData.lucro / mockDashboardData.receitaLiquida * 100).toFixed(1)}%
             </p>
           </CardContent>
         </Card>
       </div>
 
       {/* Alertas */}
-      {(produtosSemCusto > 0 || entregasSemCusto > 0 || contasVencendo > 0) && (
+      {(produtosSemCusto > 0 || entregasSemCusto > 0 || contasVencendoLocal > 0) && (
         <div className="grid gap-4 md:grid-cols-3">
           {produtosSemCusto > 0 && (
             <Card className="bg-amber-500/10 border-amber-500/20">
@@ -148,7 +132,7 @@ export function DashboardView() {
               </CardContent>
             </Card>
           )}
-          {contasVencendo > 0 && (
+          {contasVencendoLocal > 0 && (
             <Card className="bg-destructive/10 border-destructive/20">
               <CardContent className="flex items-center gap-4 p-4">
                 <div className="p-3 bg-destructive/20 rounded-full text-destructive">
@@ -156,7 +140,7 @@ export function DashboardView() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-destructive">A Pagar (7d) / Atrasado</p>
-                  <p className="text-xl font-bold text-destructive">{formatCurrency(contasVencendo)}</p>
+                  <p className="text-xl font-bold text-destructive">{formatCurrency(contasVencendoLocal)}</p>
                 </div>
               </CardContent>
             </Card>
@@ -165,65 +149,102 @@ export function DashboardView() {
       )}
 
       <div className="grid gap-6 md:grid-cols-7">
-        {/* Gráfico */}
         <Card className="md:col-span-4 lg:col-span-5">
           <CardHeader>
             <CardTitle className="text-lg">Faturamento vs Lucro (Últimos 7 dias)</CardTitle>
           </CardHeader>
           <CardContent className="pt-4">
             <ResponsiveContainer width="100%" height={280}>
-              <AreaChart data={chartData}>
+              <AreaChart data={mockChartData}>
                 <defs>
                   <linearGradient id="gradFat" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#db2777" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="#db2777" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#db2777" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#db2777" stopOpacity={0}/>
                   </linearGradient>
                   <linearGradient id="gradLucro" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#059669" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="#059669" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#059669" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#059669" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickFormatter={(v) => `R$${(v/1000).toFixed(0)}k`} tickLine={false} axisLine={false} />
-                <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} formatter={(value: number) => formatCurrency(value)} />
-                <Area type="monotone" dataKey="faturamento" name="Faturamento" stroke="#db2777" fill="url(#gradFat)" strokeWidth={2} />
-                <Area type="monotone" dataKey="lucro" name="Lucro" stroke="#059669" fill="url(#gradLucro)" strokeWidth={2} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={11} />
+                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickFormatter={(v) => `R$${(v/1000).toFixed(0)}k`} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
+                  labelStyle={{ color: 'hsl(var(--foreground))' }}
+                  formatter={(value: any) => formatCurrency(value as number)}
+                />
+                <Area type="monotone" dataKey="faturamento" stroke="#db2777" fill="url(#gradFat)" strokeWidth={2} />
+                <Area type="monotone" dataKey="lucro" stroke="#059669" fill="url(#gradLucro)" strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        {/* Lançamentos Recentes */}
         <Card className="md:col-span-3 lg:col-span-2 overflow-hidden flex flex-col">
           <CardHeader>
-            <CardTitle className="text-lg">Vendas Recentes</CardTitle>
+            <CardTitle className="text-lg">Metas do Mês</CardTitle>
           </CardHeader>
           <CardContent className="flex-1 overflow-y-auto">
             <div className="space-y-4">
-              {recentSales.map(sale => (
-                <div key={sale.id} className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
-                  <div>
-                    <p className="text-sm font-medium">{sale.customer}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full border ${getStatusColor(sale.status)}`}>
-                        {getStatusLabel(sale.status)}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground">{new Date(sale.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                    </div>
+              {mockGoals.map((g, i) => (
+                <div key={i} className="space-y-2">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="font-medium">{g.name}</span>
+                    <span className="text-muted-foreground">{g.name.includes('Envios') ? g.target : formatCurrency(g.target as number)}</span>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-bold">{formatCurrency(sale.total)}</p>
-                    <p className="text-[10px] text-emerald-500">L: {formatCurrency(sale.profit)}</p>
+                  <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-primary" 
+                      style={{ width: `${Math.min((Number(g.current) / Number(g.target)) * 100, 100)}%` }}
+                    />
                   </div>
+                  <p className="text-xs text-muted-foreground text-right">{g.name.includes('Envios') ? `${g.current} realizados` : `${formatCurrency(g.current as number)} alcançado`}</p>
                 </div>
               ))}
-              {recentSales.length === 0 && (
-                <div className="text-center text-sm text-muted-foreground py-8">
-                  Nenhuma venda no período.
-                </div>
-              )}
             </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-6">
+        {/* Recentes */}
+        <Card className="overflow-hidden flex flex-col">
+          <CardHeader>
+            <CardTitle className="text-lg">Atividades Recentes e Custos Pagos/Vencendo</CardTitle>
+          </CardHeader>
+          <CardContent className="flex-1 overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead className="bg-muted text-muted-foreground uppercase">
+                <tr>
+                  <th className="px-4 py-3 font-medium">Data</th>
+                  <th className="px-4 py-3 font-medium">Resumo</th>
+                  <th className="px-4 py-3 font-medium">Categoria</th>
+                  <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3 font-medium text-right">Valor</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {recentTransactions.map(t => (
+                  <tr key={t.id} className="hover:bg-muted/50 transition-colors">
+                    <td className="px-4 py-3">{new Date(t.date).toLocaleDateString()}</td>
+                    <td className="px-4 py-3 font-medium">{t.summary}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{t.category}</td>
+                    <td className="px-4 py-3">
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${getStatusColor(t.status)}`}>
+                        {getStatusLabel(t.status)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right font-medium">{formatCurrency(t.value)}</td>
+                  </tr>
+                ))}
+                {recentTransactions.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">Nenhum custo registrado.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </CardContent>
         </Card>
       </div>

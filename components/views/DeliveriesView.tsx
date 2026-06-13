@@ -1,28 +1,39 @@
 'use client';
 import { useState, useMemo } from 'react';
 import { useStore } from '@/contexts/StoreContext';
-import { mockDeliveries } from '@/lib/mockData';
+import { mockDeliveries, filterByStore } from '@/lib/mockData';
 import { formatCurrency, getStatusColor, getStatusLabel } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { Search } from 'lucide-react';
+import { Drawer } from '@/components/ui/Drawer';
+import { useToast } from '@/components/ui/Toast';
 
 export function DeliveriesView() {
+  const { selectedStore } = useStore();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [page, setPage] = useState(1);
+  const [selectedDelivery, setSelectedDelivery] = useState<any | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const { showToast } = useToast();
 
   const filtered = useMemo(() => {
-    let data = mockDeliveries;
+    let data = filterByStore(mockDeliveries, selectedStore);
     if (search) {
       const q = search.toLowerCase();
       data = data.filter(d => d.id.toLowerCase().includes(q) || d.customer.toLowerCase().includes(q) || d.tracking.toLowerCase().includes(q));
     }
     if (statusFilter !== 'all') data = data.filter(d => d.status === statusFilter);
     return data;
-  }, [search, statusFilter]);
+  }, [search, statusFilter, selectedStore]);
 
   const totalPages = Math.ceil(filtered.length / 20);
   const paginated = filtered.slice((page - 1) * 20, page * 20);
+
+  const handleSave = () => {
+    showToast("Salvo com sucesso");
+    setIsDrawerOpen(false);
+  };
 
   return (
     <div className="space-y-6">
@@ -72,14 +83,14 @@ export function DeliveriesView() {
             </thead>
             <tbody className="divide-y divide-border">
               {paginated.map(delivery => (
-                <tr key={delivery.id} className="hover:bg-muted/50 transition-colors">
+                <tr key={delivery.id} className="hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => { setSelectedDelivery(delivery); setIsDrawerOpen(true); }}>
                   <td className="px-4 py-3 font-mono text-xs">{delivery.id}</td>
                   <td className="px-4 py-3 font-medium">{delivery.customer}</td>
                   <td className="px-4 py-3">{delivery.carrier}</td>
                   <td className="px-4 py-3 font-mono text-xs">{(delivery.tracking !== 'N/A' && delivery.tracking) ? delivery.tracking : '-'}</td>
                   <td className="px-4 py-3">{delivery.deadline}</td>
                   <td className="px-4 py-3">
-                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${getStatusColor(delivery.status)}`}>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${getStatusColor(delivery.status)}`}>
                       {getStatusLabel(delivery.status)}
                     </span>
                   </td>
@@ -104,6 +115,32 @@ export function DeliveriesView() {
           </div>
         )}
       </Card>
+
+      <Drawer isOpen={isDrawerOpen} onClose={() => {setIsDrawerOpen(false); setSelectedDelivery(null)}} title={selectedDelivery ? `Editar Entrega ${selectedDelivery.id}` : 'Nova Entrega'}>
+        <div className="space-y-4">
+          <div className="grid gap-4">
+            <div>
+              <label className="mb-1.5 block text-sm font-medium">Cliente</label>
+              <input type="text" defaultValue={selectedDelivery?.customer} className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">Motoboy/Transportadora</label>
+                <input type="text" defaultValue={selectedDelivery?.carrier} className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary" />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">Código Rastreio</label>
+                <input type="text" defaultValue={selectedDelivery?.tracking !== 'N/A' ? selectedDelivery?.tracking : ''} className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm font-mono text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary" />
+              </div>
+            </div>
+          </div>
+          
+          <div className="pt-6 border-t border-border flex justify-end gap-3">
+             <button onClick={() => setIsDrawerOpen(false)} className="px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted rounded-md transition-colors">Cancelar</button>
+             <button onClick={handleSave} className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">Salvar Alterações</button>
+          </div>
+        </div>
+      </Drawer>
     </div>
   );
 }

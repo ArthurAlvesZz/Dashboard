@@ -10,7 +10,7 @@ import { Drawer } from '@/components/ui/Drawer';
 import * as XLSX from 'xlsx';
 
 export function SalesView() {
-  const { storeId, getDateRange } = useStore();
+  const { selectedStore, getDateRange } = useStore();
   const range = getDateRange();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -18,14 +18,14 @@ export function SalesView() {
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
 
   const filtered = useMemo(() => {
-    let data = filterByDate(filterByStore(mockSales, storeId), range.from, range.to);
+    let data = filterByDate(filterByStore(mockSales, selectedStore), range.from, range.to);
     if (search) {
       const q = search.toLowerCase();
       data = data.filter(s => s.id.toLowerCase().includes(q) || s.customer.toLowerCase().includes(q));
     }
     if (statusFilter !== 'all') data = data.filter(s => s.status === statusFilter);
     return data;
-  }, [storeId, range, search, statusFilter]);
+  }, [selectedStore, range.from, range.to, search, statusFilter]);
 
   const totalPages = Math.ceil(filtered.length / 20);
   const paginated = filtered.slice((page - 1) * 20, page * 20);
