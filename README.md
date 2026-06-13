@@ -1,20 +1,20 @@
-# Santa Bronx Ops
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+</div>
 
-Dashboard de gerenciamento operacional e financeiro da Santa Bronx. 
-Este protótipo foca na visualização e controle de métricas de custos, expedição e lucratividade.
+# Run and deploy your AI Studio app
 
-## Como Executar o Protótipo Visual
+This contains everything you need to run your app locally.
 
-1. Instale as dependências:
-   ```bash
-   npm install
-   ```
+View your app in AI Studio: https://ai.studio/apps/2de66278-ca29-4174-a1db-227fe388ed3e
 
-2. Inicie o servidor de desenvolvimento:
-   ```bash
-   npm run dev
-   ```
+## Run Locally
 
-3. Abra [http://localhost:3000](http://localhost:3000) no seu navegador para visualizar.
+**Prerequisites:**  Node.js
 
-> **Importante:** Este é um protótipo visual (frontend) mockado para fins de validação de design e usabilidade. Não possui backend real ou integrações externas neste estágio.
+
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`
