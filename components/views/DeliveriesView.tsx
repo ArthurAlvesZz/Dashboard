@@ -10,7 +10,7 @@ import { useToast } from '@/components/ui/Toast';
 
 export function DeliveriesView() {
   const { selectedStore } = useStore();
-  const [search, setSearch] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [selectedDelivery, setSelectedDelivery] = useState<any | null>(null);
@@ -19,13 +19,13 @@ export function DeliveriesView() {
 
   const filtered = useMemo(() => {
     let data = filterByStore(mockDeliveries, selectedStore);
-    if (search) {
-      const q = search.toLowerCase();
-      data = data.filter(d => d.id.toLowerCase().includes(q) || d.customer.toLowerCase().includes(q) || d.tracking.toLowerCase().includes(q));
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase();
+      data = data.filter(d => d.id.toLowerCase().includes(q) || d.carrier.toLowerCase().includes(q) || d.store.toLowerCase().includes(q));
     }
     if (statusFilter !== 'all') data = data.filter(d => d.status === statusFilter);
     return data;
-  }, [search, statusFilter, selectedStore]);
+  }, [searchTerm, statusFilter, selectedStore]);
 
   const totalPages = Math.ceil(filtered.length / 20);
   const paginated = filtered.slice((page - 1) * 20, page * 20);
@@ -51,8 +51,8 @@ export function DeliveriesView() {
             <input
               type="search"
               placeholder="Buscar por cliente, pedido ou rastreio..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="h-9 w-full rounded-md border border-input bg-transparent pl-9 pr-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             />
           </div>

@@ -10,7 +10,7 @@ import { useStore } from '@/contexts/StoreContext';
 
 export function BusinessCostsView() {
   const { selectedStore } = useStore();
-  const [search, setSearch] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [selectedCost, setSelectedCost] = useState<any | null>(null);
@@ -19,13 +19,13 @@ export function BusinessCostsView() {
 
   const filtered = useMemo(() => {
     let data = filterByStore(mockBusinessCosts, selectedStore);
-    if (search) {
-      const q = search.toLowerCase();
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase();
       data = data.filter(c => c.summary.toLowerCase().includes(q) || c.category.toLowerCase().includes(q) || c.store.toLowerCase().includes(q));
     }
     if (statusFilter !== 'all') data = data.filter(c => c.status === statusFilter);
     return data;
-  }, [search, statusFilter, selectedStore]);
+  }, [searchTerm, statusFilter, selectedStore]);
 
   const totalPages = Math.ceil(filtered.length / 20);
   const paginated = filtered.slice((page - 1) * 20, page * 20);
@@ -54,8 +54,8 @@ export function BusinessCostsView() {
             <input
               type="search"
               placeholder="Buscar por descrição, categoria ou loja..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="h-9 w-full rounded-md border border-input bg-transparent pl-9 pr-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             />
           </div>
