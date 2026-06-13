@@ -201,7 +201,7 @@ export function ImportCostsView() {
                 <AlertTriangle className="w-5 h-5 shrink-0" />
                 <p className="leading-relaxed text-[13px]">
                   Aviso Estrutural: 2 SKUs (CON07, Verde P RAYSSA) detectados com valor numérico R$ 0,00 na matriz.
-                  Por política, valores nulos <b>não efetuam "override"</b> num custo estabelecido, a fim de proteger a exibição do produto.
+                  Por política, valores nulos <b>não efetuam &quot;override&quot;</b> num custo estabelecido, a fim de proteger a exibição do produto.
                 </p>
              </div>
              <table className="w-full text-left text-sm font-sans mb-4">
