@@ -1,61 +1,356 @@
-export const STORES = [
-  { id: "1", name: "Araguari" },
-  { id: "2", name: "Uberlândia" },
+import { addDays, subDays, subHours } from 'date-fns';
+
+// ─── TYPES ──────────────────────────────────────────────
+export interface Product {
+  id: string;
+  sku: string;
+  name: string;
+  variation: string;
+  pixPrice: number;
+  cardPrice: number;
+  cost: number;
+  stock: number;
+  status: 'ok' | 'pendente';
+  origin: string;
+  lastUpdate: string;
+}
+
+export interface SaleItem {
+  sku: string;
+  name: string;
+  qty: number;
+  price: number;
+  cost: number;
+}
+
+export interface Sale {
+  id: string;
+  customer: string;
+  date: string;
+  status: 'entregue' | 'em_transito' | 'processando' | 'preparando' | 'cancelado';
+  store: string;
+  storeId: string;
+  paymentMethod: string;
+  fee: number;
+  total: number;
+  netTotal: number;
+  productCost: number;
+  deliveryCost: number;
+  profit: number;
+  items: SaleItem[];
+}
+
+export interface BusinessCost {
+  id: string;
+  date: string;
+  summary: string;
+  category: string;
+  type: 'Fixo' | 'Variável';
+  store: string;
+  storeId: string;
+  value: number;
+  status: 'pago' | 'vencendo' | 'pendente' | 'em aberto' | 'atrasado';
+  recurrence: boolean;
+}
+
+export interface DeliveryCost {
+  id: string;
+  order: string;
+  saleId: string;
+  date: string;
+  method: string;
+  charged: number;
+  realCost: number;
+  diff: number;
+  status: 'ok' | 'alerta' | 'pendente';
+  store: string;
+  storeId: string;
+}
+
+export interface Delivery {
+  id: string;
+  customer: string;
+  tracking: string;
+  carrier: string;
+  cost: number;
+  deadline: string;
+  status: string;
+}
+
+export interface StockEntry {
+  date: string;
+  description: string;
+  value: number;
+  type: 'entrada';
+}
+
+export interface StockExit {
+  date: string;
+  value: number;
+  type: 'saida';
+}
+
+// ─── STORES ─────────────────────────────────────────────
+export const stores = [
+  { id: 'all', name: 'Todas as Lojas' },
+  { id: 'araguari', name: 'Araguari' },
+  { id: 'uberlandia', name: 'Uberlândia' },
 ];
 
-export const PRODUCTS = [
-  { id: "p1", sku: "ADS01", name: "Camiseta ADS01 Preta", variation: "Preta P", pixPrice: 79.90, cardPrice: 89.90, price: 89.90, cost: 32.50, stock: 45, status: "active", origin: "xlsx", lastUpdate: "2026-06-12" },
-  { id: "p2", sku: "ADS02", name: "Camiseta ADS01 Branca", variation: "Branca M", pixPrice: 79.90, cardPrice: 89.90, price: 89.90, cost: 32.50, stock: 32, status: "active", origin: "manual", lastUpdate: "2026-06-12" },
-  { id: "p3", sku: "CON07", name: "Calça CON07 Jeans", variation: "38", pixPrice: 139.90, cardPrice: 149.90, price: 149.90, cost: 60.00, stock: 15, status: "active", origin: "manual", lastUpdate: "2026-06-10" },
-  { id: "p4", sku: "VRD-P", name: "Vestido RAYSSA", variation: "Verde P", pixPrice: 69.90, cardPrice: 79.90, price: 79.90, cost: 30.00, stock: 8, status: "pending_cost", origin: "csv", lastUpdate: "2026-06-11" },
-  { id: "p5", sku: "CRM-50", name: "Creme PRT50", variation: "Único", pixPrice: 109.90, cardPrice: 119.90, price: 119.90, cost: 45.00, stock: 24, status: "active", origin: "xlsx", lastUpdate: "2026-06-08" },
-  { id: "p6", sku: "BLU-IN", name: "Blusão Inverno", variation: "M", pixPrice: 199.90, cardPrice: 219.90, price: 219.90, cost: 95.00, stock: 12, status: "active", origin: "manual", lastUpdate: "2026-06-12" },
-  { id: "p7", sku: "BLU-IN-G", name: "Blusão Inverno", variation: "G", pixPrice: 199.90, cardPrice: 219.90, price: 219.90, cost: 95.00, stock: 5, status: "active", origin: "manual", lastUpdate: "2026-06-12" },
-  { id: "p8", sku: "TSH-B", name: "T-Shirt Básica", variation: "Preta", pixPrice: 49.90, cardPrice: 59.90, price: 59.90, cost: 18.50, stock: 150, status: "active", origin: "xlsx", lastUpdate: "2026-06-01" },
-  { id: "p9", sku: "TSH-W", name: "T-Shirt Básica", variation: "Branca", pixPrice: 49.90, cardPrice: 59.90, price: 59.90, cost: 18.50, stock: 120, status: "active", origin: "xlsx", lastUpdate: "2026-06-01" },
-  { id: "p10", sku: "TSH-G", name: "T-Shirt Básica", variation: "Cinza", pixPrice: 49.90, cardPrice: 59.90, price: 59.90, cost: 18.50, stock: 85, status: "active", origin: "xlsx", lastUpdate: "2026-06-01" },
-  { id: "p11", sku: "SNE-W", name: "Sneaker Casual", variation: "Branco 39", pixPrice: 249.90, cardPrice: 279.90, price: 279.90, cost: 110.00, stock: 10, status: "active", origin: "manual", lastUpdate: "2026-06-05" },
-  { id: "p12", sku: "SNE-B", name: "Sneaker Casual", variation: "Preto 40", pixPrice: 249.90, cardPrice: 279.90, price: 279.90, cost: 110.00, stock: 8, status: "active", origin: "manual", lastUpdate: "2026-06-05" },
-  { id: "p13", sku: "JAC-L", name: "Jaqueta Couro", variation: "M", pixPrice: 399.90, cardPrice: 449.90, price: 449.90, cost: 180.00, stock: 4, status: "active", origin: "xlsx", lastUpdate: "2026-06-03" },
-  { id: "p14", sku: "SOC-PK", name: "Meias Pack", variation: "3 pares", pixPrice: 29.90, cardPrice: 34.90, price: 34.90, cost: 9.00, stock: 200, status: "active", origin: "csv", lastUpdate: "2026-06-10" },
-  { id: "p15", sku: "BEL-L", name: "Cinto Couro", variation: "Único", pixPrice: 89.90, cardPrice: 99.90, price: 99.90, cost: 35.00, stock: 45, status: "active", origin: "manual", lastUpdate: "2026-06-02" },
-  { id: "p16", sku: "HAT-B", name: "Boné Aba Reta", variation: "Preto", pixPrice: 59.90, cardPrice: 69.90, price: 69.90, cost: 22.00, stock: 30, status: "inactive", origin: "manual", lastUpdate: "2026-05-15" },
-  { id: "p17", sku: "SHI-F", name: "Camisa Flanela", variation: "Xadrez", pixPrice: 129.90, cardPrice: 149.90, price: 149.90, cost: 55.00, stock: 0, status: "inactive", origin: "manual", lastUpdate: "2026-05-20" },
-  { id: "p18", sku: "BAG-T", name: "Tote Bag", variation: "Cru", pixPrice: 79.90, cardPrice: 89.90, price: 89.90, cost: 28.00, stock: 15, status: "pending_cost", origin: "csv", lastUpdate: "2026-06-11" },
-  { id: "p19", sku: "GLA-S", name: "Óculos Sol", variation: "Retrô", pixPrice: 119.90, cardPrice: 139.90, price: 139.90, cost: 42.00, stock: 22, status: "active", origin: "xlsx", lastUpdate: "2026-06-04" },
-  { id: "p20", sku: "WAC-D", name: "Relógio Digital", variation: "Prata", pixPrice: 199.90, cardPrice: 229.90, price: 229.90, cost: 85.00, stock: 6, status: "active", origin: "manual", lastUpdate: "2026-06-08" },
+export const dateFilters = [
+  { id: 'hoje', name: 'Hoje' },
+  { id: 'semana', name: 'Esta Semana' },
+  { id: 'mes_atual', name: 'Mês Atual' },
+  { id: 'mes_anterior', name: 'Mês Anterior' },
+  { id: 'personalizado', name: 'Personalizado...' },
 ];
 
-export const SALES = [
-  { id: "s1", storeId: "1", date: "2026-06-12T14:30:00Z", customer: "João Silva", total: 179.80, status: "completed", paymentMethod: "pix", items: [{ sku: "ADS01", qty: 2 }] },
-  { id: "s2", storeId: "2", date: "2026-06-12T15:45:00Z", customer: "Maria Costa", total: 149.90, status: "pending", paymentMethod: "card", items: [{ sku: "CON07", qty: 1 }] },
-  { id: "s3", storeId: "1", date: "2026-06-11T10:15:00Z", customer: "Carlos Moura", total: 79.90, status: "completed", paymentMethod: "cash", items: [{ sku: "VRD-P", qty: 1 }] },
-  { id: "s4", storeId: "2", date: "2026-06-10T09:20:00Z", customer: "Ana Julia", total: 209.80, status: "canceled", paymentMethod: "pix", items: [{ sku: "ADS02", qty: 1 }, { sku: "CRM-50", qty: 1 }] },
-  { id: "s5", storeId: "1", date: "2026-06-09T11:10:00Z", customer: "Pedro Henrique", total: 59.90, status: "completed", paymentMethod: "pix", items: [{ sku: "TSH-W", qty: 1 }] },
-  { id: "s6", storeId: "2", date: "2026-06-09T16:05:00Z", customer: "Juliana Paes", total: 449.90, status: "completed", paymentMethod: "card", items: [{ sku: "JAC-L", qty: 1 }] },
-  { id: "s7", storeId: "1", date: "2026-06-08T13:40:00Z", customer: "Roberto Carlos", total: 139.90, status: "refunded", paymentMethod: "pix", items: [{ sku: "GLA-S", qty: 1 }] },
+// ─── PRODUCTS (20 produtos) ──────────────────────────────
+export const mockProducts: Product[] = [
+  { id: '1', sku: 'ADS01', name: 'Camiseta Classic', variation: 'Preta / M', pixPrice: 89.90, cardPrice: 99.90, cost: 45.50, stock: 120, status: 'ok', origin: 'Araguari / Manual', lastUpdate: 'Hoje, 09:30' },
+  { id: '2', sku: 'ADS02', name: 'Camiseta Classic', variation: 'Branca / G', pixPrice: 89.90, cardPrice: 99.90, cost: 45.50, stock: 85, status: 'ok', origin: 'Sistema / XLSX', lastUpdate: 'Ontem' },
+  { id: '3', sku: 'CON07', name: 'Conjunto Inverno 07', variation: 'Único', pixPrice: 250.00, cardPrice: 280.00, cost: 0, stock: 30, status: 'pendente', origin: 'Importação Pendente', lastUpdate: '3 dias atrás' },
+  { id: '4', sku: 'Verde P RAYSSA', name: 'Vestido Rayssa', variation: 'Verde / P', pixPrice: 199.00, cardPrice: 220.00, cost: 0, stock: 12, status: 'pendente', origin: 'Sistema / CSV', lastUpdate: '1 semana atrás' },
+  { id: '5', sku: 'Creme PRT50', name: 'Calça Premium', variation: 'Creme / 40', pixPrice: 320.00, cardPrice: 350.00, cost: 110.00, stock: 45, status: 'ok', origin: 'Araguari / Manual', lastUpdate: 'Mês passado' },
+  { id: '6', sku: 'ADS03', name: 'Camiseta Oversized', variation: 'Preta / GG', pixPrice: 109.90, cardPrice: 119.90, cost: 52.00, stock: 67, status: 'ok', origin: 'Uberlândia / XLSX', lastUpdate: 'Hoje' },
+  { id: '7', sku: 'MOL01', name: 'Moletom Canguru', variation: 'Cinza / M', pixPrice: 189.90, cardPrice: 209.90, cost: 78.00, stock: 34, status: 'ok', origin: 'Araguari / Manual', lastUpdate: '2 dias atrás' },
+  { id: '8', sku: 'CON08', name: 'Conjunto Verão 08', variation: 'Rosa / P', pixPrice: 220.00, cardPrice: 245.00, cost: 95.00, stock: 18, status: 'ok', origin: 'Sistema / XLSX', lastUpdate: 'Ontem' },
+  { id: '9', sku: 'JAC01', name: 'Jaqueta Corta Vento', variation: 'Preto / G', pixPrice: 250.00, cardPrice: 280.00, cost: 120.00, stock: 22, status: 'ok', origin: 'Araguari / Manual', lastUpdate: '5 dias atrás' },
+  { id: '10', sku: 'BON01', name: 'Boné Snapback', variation: 'Preto', pixPrice: 59.90, cardPrice: 69.90, cost: 22.00, stock: 90, status: 'ok', origin: 'Uberlândia / XLSX', lastUpdate: 'Hoje' },
+  { id: '11', sku: 'TSH01', name: 'T-Shirt Básica', variation: 'Branca / M', pixPrice: 69.90, cardPrice: 79.90, cost: 28.00, stock: 150, status: 'ok', origin: 'Sistema / CSV', lastUpdate: 'Ontem' },
+  { id: '12', sku: 'CAL01', name: 'Calça Alfaiataria', variation: 'Preta / 42', pixPrice: 280.00, cardPrice: 310.00, cost: 98.00, stock: 28, status: 'ok', origin: 'Araguari / Manual', lastUpdate: '3 dias atrás' },
+  { id: '13', sku: 'VER01', name: 'Vestido Longo', variation: 'Azul / M', pixPrice: 210.00, cardPrice: 235.00, cost: 0, stock: 15, status: 'pendente', origin: 'Importação Pendente', lastUpdate: '1 semana atrás' },
+  { id: '14', sku: 'ACS01', name: 'Cinto Couro', variation: 'Marrom', pixPrice: 89.90, cardPrice: 99.90, cost: 35.00, stock: 40, status: 'ok', origin: 'Uberlândia / Manual', lastUpdate: '4 dias atrás' },
+  { id: '15', sku: 'MOL02', name: 'Moletom Zipado', variation: 'Preto / G', pixPrice: 199.90, cardPrice: 219.90, cost: 85.00, stock: 25, status: 'ok', origin: 'Araguari / XLSX', lastUpdate: 'Hoje' },
+  { id: '16', sku: 'SAI01', name: 'Saia Midi', variation: 'Bege / M', pixPrice: 150.00, cardPrice: 170.00, cost: 55.00, stock: 32, status: 'ok', origin: 'Sistema / CSV', lastUpdate: 'Ontem' },
+  { id: '17', sku: 'CON09', name: 'Conjunto Fitness', variation: 'Preto / P', pixPrice: 180.00, cardPrice: 200.00, cost: 0, stock: 0, status: 'pendente', origin: 'Importação Pendente', lastUpdate: '2 semanas' },
+  { id: '18', sku: 'TEN01', name: 'Tênis Casual', variation: 'Branco / 40', pixPrice: 220.00, cardPrice: 250.00, cost: 110.00, stock: 19, status: 'ok', origin: 'Uberlândia / XLSX', lastUpdate: '3 dias atrás' },
+  { id: '19', sku: 'GPS01', name: 'Polo Essentials', variation: 'Azul / G', pixPrice: 119.90, cardPrice: 129.90, cost: 48.00, stock: 55, status: 'ok', origin: 'Araguari / Manual', lastUpdate: 'Hoje' },
+  { id: '20', sku: 'CAL02', name: 'Calça Jogger', variation: 'Cinza / M', pixPrice: 160.00, cardPrice: 180.00, cost: 65.00, stock: 38, status: 'ok', origin: 'Sistema / XLSX', lastUpdate: 'Ontem' },
 ];
 
-export const DELIVERIES = [
-  { id: "d1", saleId: "s1", status: "delivered", carrier: "Correios", tracking: "BR123456789BR", cost: 15.50, estimatedDate: "2026-06-15" },
-  { id: "d2", saleId: "s2", status: "in_transit", carrier: "Loggi", tracking: "LG987654321", cost: 22.00, estimatedDate: "2026-06-16" },
-  { id: "d3", saleId: "s3", status: "delivered", carrier: "Motoboy", tracking: "MT0001", cost: 10.00, estimatedDate: "2026-06-11" },
-  { id: "d4", saleId: "s5", status: "separated", carrier: "Correios", tracking: "BR987654321BR", cost: 18.00, estimatedDate: "2026-06-18" },
+// ─── SALES (50 vendas geradas) ──────────────────────────
+function generateSales(): Sale[] {
+  const customers = [
+    'João Silva', 'Maria Oliveira', 'Carlos Mendes', 'Ana Julia', 'Pedro Santos',
+    'Lucia Ferreira', 'Roberto Lima', 'Fernanda Alves', 'Marcos Oliveira', 'Patricia Souza',
+    'Thiago Costa', 'Amanda Ribeiro', 'Bruno Martins', 'Camila Souza', 'Diego Fernandes',
+    'Elaine Barbosa', 'Felipe Araújo', 'Giulia Mendonça', 'Hugo Nascimento', 'Isabela Castro'
+  ];
+  const statuses: Sale['status'][] = ['entregue', 'entregue', 'entregue', 'em_transito', 'em_transito', 'processando', 'preparando', 'cancelado'];
+  const stores = [
+    { id: 'araguari', name: 'Araguari' },
+    { id: 'uberlandia', name: 'Uberlândia' },
+  ];
+  const methods = ['Pix', 'Cartão', 'Cartão 3x', 'Cartão 2x', 'Dinheiro'];
+  const fees: Record<string, number> = { 'Pix': 0, 'Cartão': 1.99, 'Cartão 3x': 3.8, 'Cartão 2x': 2.5, 'Dinheiro': 0 };
+
+  const sales: Sale[] = [];
+
+  for (let i = 1; i <= 50; i++) {
+    const store = stores[Math.floor(Math.random() * stores.length)];
+    const day = Math.floor(Math.random() * 13) + 1;
+    const hour = Math.floor(Math.random() * 12) + 8;
+    const minute = Math.floor(Math.random() * 60);
+    const date = `2026-06-${day.toString().padStart(2, '0')}T${hour}:${minute.toString().padStart(2, '0')}:00Z`;
+    const customer = customers[Math.floor(Math.random() * customers.length)];
+    const status = statuses[Math.floor(Math.random() * statuses.length)];
+    const method = methods[Math.floor(Math.random() * methods.length)];
+    const feePercent = fees[method];
+
+    const numItems = Math.floor(Math.random() * 3) + 1;
+    const items: SaleItem[] = [];
+    let total = 0;
+    let productCost = 0;
+
+    for (let j = 0; j < numItems; j++) {
+      const product = mockProducts[Math.floor(Math.random() * mockProducts.length)];
+      const qty = Math.floor(Math.random() * 2) + 1;
+      const price = method.includes('Pix') ? product.pixPrice : product.cardPrice;
+      items.push({ sku: product.sku, name: product.name, qty, price, cost: product.cost });
+      total += price * qty;
+      productCost += product.cost * qty;
+    }
+
+    const fee = total * (feePercent / 100);
+    const netTotal = total - fee;
+    const deliveryCost = Math.random() > 0.3 ? Math.floor(Math.random() * 25) + 10 : 0;
+    const profit = netTotal - productCost - deliveryCost;
+
+    sales.push({
+      id: `PED-${1050 + i}`,
+      customer,
+      date,
+      status,
+      store: store.name,
+      storeId: store.id,
+      paymentMethod: method,
+      fee,
+      total,
+      netTotal,
+      productCost,
+      deliveryCost,
+      profit,
+      items,
+    });
+  }
+
+  return sales.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+}
+
+export const mockSales: Sale[] = generateSales();
+
+// ─── BUSINESS COSTS (25 custos) ─────────────────────────
+export const mockBusinessCosts: BusinessCost[] = [
+  { id: '1', date: addDays(new Date(), 2).toISOString(), summary: 'Aluguel Loja Araguari', category: 'Infraestrutura', type: 'Fixo', store: 'Araguari', storeId: 'araguari', value: 4500.00, status: 'vencendo', recurrence: true },
+  { id: '2', date: subDays(new Date(), 3).toISOString(), summary: 'Conta de Energia', category: 'Infraestrutura', type: 'Fixo', store: 'Uberlândia', storeId: 'uberlandia', value: 850.00, status: 'pago', recurrence: true },
+  { id: '3', date: addDays(new Date(), 5).toISOString(), summary: 'Embalagens G', category: 'Insumos', type: 'Variável', store: 'Todas', storeId: 'all', value: 1200.00, status: 'vencendo', recurrence: false },
+  { id: '4', date: addDays(new Date(), 10).toISOString(), summary: 'Marketing / Meta Ads', category: 'Marketing', type: 'Variável', store: 'Todas', storeId: 'all', value: 5000.00, status: 'pendente', recurrence: true },
+  { id: '5', date: subDays(new Date(), 1).toISOString(), summary: 'Aluguel Loja Uberlândia', category: 'Infraestrutura', type: 'Fixo', store: 'Uberlândia', storeId: 'uberlandia', value: 5200.00, status: 'pago', recurrence: true },
+  { id: '6', date: addDays(new Date(), 3).toISOString(), summary: 'Salário Atendente', category: 'Equipe e RH', type: 'Fixo', store: 'Araguari', storeId: 'araguari', value: 1800.00, status: 'vencendo', recurrence: true },
+  { id: '7', date: addDays(new Date(), 3).toISOString(), summary: 'Salário Vendedor', category: 'Equipe e RH', type: 'Fixo', store: 'Uberlândia', storeId: 'uberlandia', value: 2000.00, status: 'vencendo', recurrence: true },
+  { id: '8', date: subDays(new Date(), 5).toISOString(), summary: 'Internet Fibra', category: 'Sistemas', type: 'Fixo', store: 'Araguari', storeId: 'araguari', value: 150.00, status: 'pago', recurrence: true },
+  { id: '9', date: subDays(new Date(), 5).toISOString(), summary: 'Internet Fibra', category: 'Sistemas', type: 'Fixo', store: 'Uberlândia', storeId: 'uberlandia', value: 150.00, status: 'pago', recurrence: true },
+  { id: '10', date: addDays(new Date(), 8).toISOString(), summary: 'IPTU Trimestral', category: 'Infraestrutura', type: 'Fixo', store: 'Araguari', storeId: 'araguari', value: 850.00, status: 'pendente', recurrence: true },
+  { id: '11', date: addDays(new Date(), 12).toISOString(), summary: 'Manutenção Ar-Condicionado', category: 'Manutenção', type: 'Variável', store: 'Araguari', storeId: 'araguari', value: 180.00, status: 'pendente', recurrence: false },
+  { id: '12', date: subDays(new Date(), 7).toISOString(), summary: 'Assinatura PDV', category: 'Sistemas', type: 'Fixo', store: 'Todas', storeId: 'all', value: 89.00, status: 'pago', recurrence: true },
+  { id: '13', date: addDays(new Date(), 15).toISOString(), summary: 'Conta de Água', category: 'Infraestrutura', type: 'Variável', store: 'Araguari', storeId: 'araguari', value: 95.00, status: 'pendente', recurrence: true },
+  { id: '14', date: addDays(new Date(), 15).toISOString(), summary: 'Conta de Água', category: 'Infraestrutura', type: 'Variável', store: 'Uberlândia', storeId: 'uberlandia', value: 110.00, status: 'pendente', recurrence: true },
+  { id: '15', date: subDays(new Date(), 2).toISOString(), summary: 'Material de Limpeza', category: 'Manutenção', type: 'Variável', store: 'Todas', storeId: 'all', value: 250.00, status: 'pago', recurrence: false },
+  { id: '16', date: subDays(new Date(), 10).toISOString(), summary: 'Compra Estoque Camisetas', category: 'Insumos', type: 'Variável', store: 'Araguari', storeId: 'araguari', value: 8500.00, status: 'pago', recurrence: false },
+  { id: '17', date: subDays(new Date(), 8).toISOString(), summary: 'Compra Estoque Calças', category: 'Insumos', type: 'Variável', store: 'Uberlândia', storeId: 'uberlandia', value: 6200.00, status: 'pago', recurrence: false },
+  { id: '18', date: subDays(new Date(), 4).toISOString(), summary: 'Frete Fornecedor', category: 'Insumos', type: 'Variável', store: 'Todas', storeId: 'all', value: 1350.00, status: 'pago', recurrence: false },
+  { id: '19', date: addDays(new Date(), 6).toISOString(), summary: 'Condomínio Galpão', category: 'Infraestrutura', type: 'Fixo', store: 'Araguari', storeId: 'araguari', value: 450.00, status: 'atrasado', recurrence: true },
+  { id: '20', date: addDays(new Date(), 6).toISOString(), summary: 'Condomínio Galpão', category: 'Infraestrutura', type: 'Fixo', store: 'Uberlândia', storeId: 'uberlandia', value: 520.00, status: 'vencendo', recurrence: true },
+  { id: '21', date: addDays(new Date(), 20).toISOString(), summary: 'Plano Celular Loja', category: 'Sistemas', type: 'Fixo', store: 'Araguari', storeId: 'araguari', value: 79.00, status: 'pendente', recurrence: true },
+  { id: '22', date: addDays(new Date(), 20).toISOString(), summary: 'Plano Celular Loja', category: 'Sistemas', type: 'Fixo', store: 'Uberlândia', storeId: 'uberlandia', value: 79.00, status: 'pendente', recurrence: true },
+  { id: '23', date: subDays(new Date(), 6).toISOString(), summary: 'Conserto Vidraça', category: 'Manutenção', type: 'Variável', store: 'Araguari', storeId: 'araguari', value: 280.00, status: 'pago', recurrence: false },
+  { id: '24', date: addDays(new Date(), 4).toISOString(), summary: 'Instagram Ads', category: 'Marketing', type: 'Variável', store: 'Uberlândia', storeId: 'uberlandia', value: 350.00, status: 'vencendo', recurrence: true },
+  { id: '25', date: subDays(new Date(), 9).toISOString(), summary: 'Software Gestão', category: 'Sistemas', type: 'Fixo', store: 'Todas', storeId: 'all', value: 49.00, status: 'pago', recurrence: true },
 ];
 
-export const BUSINESS_COSTS = [
-  { id: "c1", storeId: "1", type: "fixed", description: "Aluguel", amount: 3500.00, month: "2026-06" },
-  { id: "c2", storeId: "2", type: "fixed", description: "Aluguel", amount: 4200.00, month: "2026-06" },
-  { id: "c3", storeId: "1", type: "variable", description: "Energia", amount: 450.00, month: "2026-06" },
-  { id: "c4", storeId: "1", type: "variable", description: "Internet", amount: 150.00, month: "2026-06" },
-  { id: "c5", storeId: "2", type: "variable", description: "Energia", amount: 520.00, month: "2026-06" },
-  { id: "c6", storeId: "1", type: "variable", description: "Material Limpeza", amount: 120.00, month: "2026-06" },
-  { id: "c7", storeId: "2", type: "fixed", description: "Software PDV", amount: 200.00, month: "2026-06" },
+// ─── DELIVERY COSTS (30 entregas) ───────────────────────
+function generateDeliveryCosts(): DeliveryCost[] {
+  const methods = ['Motoboy Lógico', 'Correios SEDEX', 'Motoboy Terceiro', 'Retirada', 'Transportadora'];
+  const stores = [
+    { id: 'araguari', name: 'Araguari' },
+    { id: 'uberlandia', name: 'Uberlândia' },
+  ];
+  const costs: DeliveryCost[] = [];
+
+  for (let i = 1; i <= 30; i++) {
+    const store = stores[Math.floor(Math.random() * stores.length)];
+    const method = methods[Math.floor(Math.random() * methods.length)];
+    const charged = method === 'Retirada' ? 0 : Math.floor(Math.random() * 25) + 10;
+    const realCost = method === 'Retirada' ? 0 : Math.floor(Math.random() * 35) + 10;
+    const status = realCost === 0 && method !== 'Retirada' ? 'pendente' : (realCost > charged ? 'alerta' : 'ok');
+
+    costs.push({
+      id: `dc${i}`,
+      order: `PED-${1050 + i}`,
+      saleId: `s${i}`,
+      date: subDays(new Date(), Math.floor(Math.random() * 10)).toISOString(),
+      method,
+      charged,
+      realCost,
+      diff: charged - realCost,
+      status: status as 'ok' | 'alerta' | 'pendente',
+      store: store.name,
+      storeId: store.id,
+    });
+  }
+  return costs;
+}
+
+export const mockDeliveryCosts: DeliveryCost[] = generateDeliveryCosts();
+
+// ─── DELIVERIES (10 entregas) ───────────────────────────
+export const mockDeliveries: Delivery[] = [
+  { id: 'PED-1092', customer: 'João Silva', tracking: 'MB-493', carrier: 'Motoboy Zé', cost: 15.00, deadline: 'Hoje', status: 'entregue' },
+  { id: 'PED-1093', customer: 'Maria Oliveira', tracking: 'PQ123456789BR', carrier: 'Correios', cost: 35.00, deadline: 'Amanhã', status: 'em_transito' },
+  { id: 'PED-1094', customer: 'Carlos Mendes', tracking: 'LG987654321', carrier: 'Loggi', cost: 28.00, deadline: '2 dias', status: 'em_transito' },
+  { id: 'PED-1095', customer: 'Ana Julia', tracking: 'MB-495', carrier: 'Motoboy (A Definir)', cost: 0, deadline: 'Hoje', status: 'preparando' },
+  { id: 'PED-1096', customer: 'Pedro Santos', tracking: 'JD111222333', carrier: 'Jadlog', cost: 22.00, deadline: '3 dias', status: 'processando' },
+  { id: 'PED-1097', customer: 'Lucia Ferreira', tracking: 'MB-501', carrier: 'Motoboy Zé', cost: 18.00, deadline: 'Hoje', status: 'entregue' },
+  { id: 'PED-1098', customer: 'Roberto Lima', tracking: 'PQ987654321BR', carrier: 'Correios', cost: 42.00, deadline: 'Amanhã', status: 'em_transito' },
+  { id: 'PED-1099', customer: 'Fernanda Alves', tracking: 'TE444555666', carrier: 'Total Express', cost: 32.00, deadline: '2 dias', status: 'processando' },
+  { id: 'PED-1100', customer: 'Marcos Oliveira', tracking: 'MB-510', carrier: 'Motoboy Zé', cost: 12.00, deadline: 'Hoje', status: 'entregue' },
+  { id: 'PED-1101', customer: 'Patricia Souza', tracking: 'PQ111222333BR', carrier: 'Correios', cost: 38.00, deadline: '3 dias', status: 'preparando' },
 ];
 
-export const STOCK_FLOW = [
-  { id: "sf1", type: "in", date: "2026-06-01", sku: "ADS01", qty: 50, note: "Compra fornecedor XYZ" },
-  { id: "sf2", type: "out", date: "2026-06-12", sku: "ADS01", qty: 2, note: "Venda s1" },
-  { id: "sf3", type: "in", date: "2026-06-05", sku: "TSH-W", qty: 100, note: "Compra reposição" },
-  { id: "sf4", type: "out", date: "2026-06-09", sku: "TSH-W", qty: 1, note: "Venda s5" },
+// ─── MOCK DASHBOARD DATA ────────────────────────────────
+const totalFaturamento = mockSales.reduce((a, s) => a + s.total, 0);
+const totalReceitaLiquida = mockSales.reduce((a, s) => a + s.netTotal, 0);
+const totalCustoProdutos = mockSales.reduce((a, s) => a + s.productCost, 0);
+const totalCustosFixos = mockBusinessCosts.filter(c => c.type === 'Fixo' && c.status !== 'cancelado').reduce((a, c) => a + c.value, 0);
+const totalCustosVariaveis = mockBusinessCosts.filter(c => c.type === 'Variável' && c.status !== 'cancelado').reduce((a, c) => a + c.value, 0);
+const totalCustoEntrega = mockDeliveryCosts.reduce((a, d) => a + d.realCost, 0);
+const totalLucro = totalReceitaLiquida - totalCustoProdutos - totalCustosFixos - totalCustosVariaveis - totalCustoEntrega;
+
+export const mockDashboardData = {
+  faturamentoDia: mockSales.filter(s => {
+    const d = new Date(s.date);
+    const now = new Date();
+    return d.toDateString() === now.toDateString();
+  }).reduce((a, s) => a + s.total, 0),
+  faturamentoMes: totalFaturamento,
+  receitaLiquida: totalReceitaLiquida,
+  custosFixos: totalCustosFixos,
+  custosVariaveis: totalCustosVariaveis,
+  custoEntrega: totalCustoEntrega,
+  custoProdutosVendidos: totalCustoProdutos,
+  saidaProduto: mockSales.reduce((a, s) => a + s.items.reduce((b, i) => b + i.qty, 0), 0),
+  compraEstoque: 35000.00,
+  fluxoEstoqueStatus: 'Atenção em Uberlândia',
+  previsaoFaturamento: totalFaturamento * 1.2,
+  lucro: totalLucro,
+};
+
+// ─── MOCK CHART DATA ────────────────────────────────────
+export const mockChartData = [
+  { day: '08/06', faturamento: 8200, cmv: 3100, lucro: 5100 },
+  { day: '09/06', faturamento: 9800, cmv: 3800, lucro: 6000 },
+  { day: '10/06', faturamento: 7500, cmv: 2900, lucro: 4600 },
+  { day: '11/06', faturamento: 12400, cmv: 4700, lucro: 7700 },
+  { day: '12/06', faturamento: 10800, cmv: 4100, lucro: 6700 },
+  { day: '13/06', faturamento: 6200, cmv: 2400, lucro: 3800 },
+  { day: '14/06', faturamento: 0, cmv: 0, lucro: 0 },
 ];
+
+// ─── MOCK STOCK FLOW ────────────────────────────────────
+export const mockStockFlow = {
+  comprasMes: 35000.00,
+  custoSaida: totalCustoProdutos,
+  necessidadeReposicao: Math.max(0, totalCustoProdutos - 35000),
+  saldoFluxo: 35000 - totalCustoProdutos,
+  entries: [
+    { date: subDays(new Date(), 5).toISOString(), description: 'Lote Verão #01', value: 15000.00, type: 'entrada' as const },
+    { date: subDays(new Date(), 12).toISOString(), description: 'Lote Básico #04', value: 20000.00, type: 'entrada' as const },
+  ],
+  exits: Array.from({ length: 7 }, (_, i) => ({
+    date: subDays(new Date(), i).toISOString(),
+    value: Math.floor(Math.random() * 5000) + 2000,
+    type: 'saida' as const,
+  })),
+};
+
+// ─── MOCK USERS ─────────────────────────────────────────
+export const mockUsers = [
+  { id: '1', name: 'Arthur Alves', email: 'arthur@santabronx.com', role: 'Admin', status: 'online' },
+  { id: '2', name: 'Funcionário Araguari', email: 'func1@santabronx.com', role: 'Operador', status: 'offline' },
+  { id: '3', name: 'Funcionário Uberlândia', email: 'func2@santabronx.com', role: 'Operador', status: 'offline' },
+];
+
+// ─── FILTER HELPERS ─────────────────────────────────────
+export function filterByStore<T extends { storeId?: string }>(data: T[], storeId: string): T[] {
+  if (storeId === 'all') return data;
+  return data.filter(item => item.storeId === storeId);
+}
+
+export function filterByDate<T extends { date: string }>(data: T[], from: string, to: string): T[] {
+  if (!from || !to) return data;
+  return data.filter(item => {
+    const d = new Date(item.date);
+    return d >= new Date(from) && d <= new Date(to);
+  });
+}
