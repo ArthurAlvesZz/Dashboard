@@ -14,7 +14,7 @@ export function SettingsView() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Configurações</h2>
           <p className="text-muted-foreground">Gerencie equipe e permissões da plataforma.</p>

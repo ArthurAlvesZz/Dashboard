@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
 
 interface SegmentedTabProps {
   options: { id: string; label: string }[];
@@ -16,16 +17,17 @@ export function SegmentedTab({ options, defaultValue, onChange }: SegmentedTabPr
   };
 
   return (
-    <div className="flex items-center gap-1 rounded-lg bg-muted p-0.5 shadow-sm">
+    <div className="flex items-center gap-1 rounded-lg bg-muted p-0.5 shadow-sm w-fit">
       {options.map(opt => (
         <button
           key={opt.id}
           onClick={() => handleSelect(opt.id)}
-          className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+          className={cn(
+            "rounded-md px-4 py-1.5 text-sm font-medium transition-colors",
             active === opt.id
-              ? 'bg-background text-foreground shadow-sm'
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
+              ? "bg-background text-foreground shadow-sm border border-border"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted/50 border border-transparent"
+          )}
         >
           {opt.label}
         </button>
