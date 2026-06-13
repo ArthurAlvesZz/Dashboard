@@ -47,7 +47,6 @@ const NAV_ITEMS = [
 export default function Shell() {
   const [activeMenu, setActiveMenu] = useState(NAV_ITEMS[0].id);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const { selectedStore, selectedDate, setSelectedStore, setSelectedDate } = useStore();
 
@@ -67,14 +66,9 @@ export default function Shell() {
           <Building2 className="h-6 w-6" />
           <span>Santa Bronx Ops</span>
         </div>
-        <div className="flex items-center gap-3">
-          <button className="text-muted-foreground hover:text-foreground" onClick={() => setIsSearchOpen(!isSearchOpen)}>
-            <Search className="h-5 w-5" />
-          </button>
-          <button className="text-muted-foreground hover:text-foreground" onClick={() => setSidebarOpen(!sidebarOpen)}>
-            <Menu className="h-6 w-6" />
-          </button>
-        </div>
+        <button className="text-muted-foreground hover:text-foreground" onClick={() => setSidebarOpen(!sidebarOpen)}>
+          <Menu className="h-6 w-6" />
+        </button>
       </div>
 
       {/* Sidebar */}
@@ -128,10 +122,8 @@ export default function Shell() {
             </select>
           </div>
 
-          <div 
-            className={`relative transition-all duration-300 md:block ${isSearchOpen ? 'w-full block py-2' : 'hidden w-0 md:w-64'}`}
-          >
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <div className="relative w-full md:w-64">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <input
               type="search"
               placeholder="Pesquisar..."
