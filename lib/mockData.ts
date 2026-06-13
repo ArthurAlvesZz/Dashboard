@@ -32,7 +32,7 @@ export const mockDashboardData = {
 export const mockProducts = [
   { id: '1', sku: 'ADS01', name: 'Camiseta Classic', variation: 'Preta / M', image: 'https://picsum.photos/seed/p1/200', pixPrice: 89.90, cardPrice: 99.90, cost: 45.50, margin: '49%', origin: 'Araguari / Manual', lastUpdate: 'Hoje, 09:30', status: 'ok', stock: 120 },
   { id: '2', sku: 'ADS02', name: 'Camiseta Classic', variation: 'Branca / G', image: 'https://picsum.photos/seed/p2/200', pixPrice: 89.90, cardPrice: 99.90, cost: 45.50, margin: '49%', origin: 'Sistema / XLSX', lastUpdate: 'Ontem', status: 'ok', stock: 85 },
-  { id: '3', sku: 'CON07', name: 'Conjunto Inverno 07', variation: 'Único', image: 'https://picsum.photos/seed/p3/200', pixPrice: 250.00, cardPrice: 280.00, cost: 0, margin: '0%', origin: 'Uberlândia / API', lastUpdate: '3 dias atrás', status: 'pendente', stock: 30 },
+  { id: '3', sku: 'CON07', name: 'Conjunto Inverno 07', variation: 'Único', image: 'https://picsum.photos/seed/p3/200', pixPrice: 250.00, cardPrice: 280.00, cost: 0, margin: '0%', origin: 'Importação Pendente', lastUpdate: '3 dias atrás', status: 'pendente', stock: 30 },
   { id: '4', sku: 'Verde P RAYSSA', name: 'Vestido Rayssa', variation: 'Verde / P', image: 'https://picsum.photos/seed/p4/200', pixPrice: 199.00, cardPrice: 220.00, cost: 0, margin: '0%', origin: 'Sistema / CSV', lastUpdate: '1 semana atrás', status: 'pendente', stock: 12 },
   { id: '5', sku: 'Creme PRT50', name: 'Calça Premium', variation: 'Creme / 40', image: 'https://picsum.photos/seed/p5/200', pixPrice: 320.00, cardPrice: 350.00, cost: 110.00, margin: '65%', origin: 'Araguari / Manual', lastUpdate: 'Mês passado', status: 'ok', stock: 45 },
 ];
@@ -100,13 +100,13 @@ export const mockStockFlow = {
 };
 
 export const mockChartData = [
-  { name: '01 Jun', faturamento: 4000, lucro: 1200 },
-  { name: '03 Jun', faturamento: 5500, lucro: 1800 },
-  { name: '05 Jun', faturamento: 3200, lucro: 900 },
-  { name: '07 Jun', faturamento: 7800, lucro: 2600 },
-  { name: '09 Jun', faturamento: 6500, lucro: 2100 },
-  { name: '11 Jun', faturamento: 8400, lucro: 2900 },
-  { name: '12 Jun', faturamento: 8450, lucro: 3100 },
+  { name: '01 Jun', faturamento: 4000, cmv: 1200, lucro: 1200 },
+  { name: '03 Jun', faturamento: 5500, cmv: 1500, lucro: 1800 },
+  { name: '05 Jun', faturamento: 3200, cmv: 900, lucro: 900 },
+  { name: '07 Jun', faturamento: 7800, cmv: 2100, lucro: 2600 },
+  { name: '09 Jun', faturamento: 6500, cmv: 1800, lucro: 2100 },
+  { name: '11 Jun', faturamento: 8400, cmv: 2300, lucro: 2900 },
+  { name: '12 Jun', faturamento: 8450, cmv: 2400, lucro: 3100 },
 ];
 
 export const mockUsers = [

@@ -37,3 +37,11 @@ export function CardContent({ children, className }: CardProps) {
     </div>
   );
 }
+
+export function CardDescription({ children, className }: CardProps) {
+  return (
+    <p className={cn("text-xs text-muted-foreground", className)}>
+      {children}
+    </p>
+  );
+}

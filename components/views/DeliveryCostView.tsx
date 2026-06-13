@@ -6,69 +6,82 @@ export function DeliveryCostView() {
   return (
     <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
       
-       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-5">
-            <span className="text-xs text-neutral-500 uppercase block mb-1">Total Recebido (Frete)</span>
-            <span className="text-2xl font-mono text-white tracking-tight">R$ 4.500,00</span>
+       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="bg-[#0a0a0a] border border-neutral-900 shadow-xl rounded-xl p-8 relative overflow-hidden group">
+            <div className="absolute right-0 top-0 w-32 h-full bg-gradient-to-l from-white/5 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="flex items-center gap-2 mb-3">
+               <div className="w-1.5 h-1.5 rounded-full bg-pink-500" />
+               <span className="text-[10px] font-mono font-medium text-neutral-500 uppercase tracking-widest block">Receita com Frete</span>
+            </div>
+            <span className="text-4xl font-mono text-white tracking-tighter drop-shadow-md">R$ 4.500</span>
           </div>
-          <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-5">
-            <span className="text-xs text-neutral-500 uppercase block mb-1">Custo Real (Pago a Transportadora)</span>
-            <span className="text-2xl font-mono text-red-400 tracking-tight">R$ 5.200,00</span>
+          <div className="bg-[#0a0a0a] border border-neutral-900 shadow-xl rounded-xl p-8 relative overflow-hidden group">
+            <div className="absolute right-0 top-0 w-32 h-full bg-gradient-to-l from-red-500/10 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="flex items-center gap-2 mb-3">
+               <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+               <span className="text-[10px] font-mono font-medium text-red-500/80 uppercase tracking-widest block">Pagamento a Terceiros</span>
+            </div>
+            <span className="text-4xl font-mono text-red-400 tracking-tighter drop-shadow-md">R$ 5.200</span>
           </div>
-           <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-5">
-            <span className="text-xs text-amber-500 uppercase block mb-1">Custo Absorvido pela Empresa</span>
-             <span className="text-2xl font-mono text-amber-500 tracking-tight">R$ 700,00</span>
+           <div className="bg-[#1a0f0f] border border-red-500/30 shadow-[0_0_20px_rgba(239,68,68,0.05)] rounded-xl p-8 relative overflow-hidden group">
+            <div className="absolute right-0 top-0 w-32 h-full bg-gradient-to-l from-red-500/10 to-transparent pointer-events-none animate-pulse" />
+            <div className="flex items-center gap-2 mb-3 relative z-10">
+               <div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)] animate-pulse" />
+               <span className="text-[10px] font-mono font-medium text-red-400 uppercase tracking-widest block">Custo Absorvido (Prejuízo)</span>
+            </div>
+             <span className="text-4xl font-mono text-red-500 tracking-tighter relative z-10 drop-shadow-md">R$ 700</span>
           </div>
        </div>
 
-      <Card>
-        <CardHeader className="border-b border-neutral-800">
-          <CardTitle>Auditoria de Custo com Entrega</CardTitle>
+      <Card className="bg-[#0a0a0a] border-neutral-900 shadow-2xl relative overflow-hidden mt-6">
+        <div className="absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-white/5 to-transparent pointer-events-none" />
+        <CardHeader className="border-b border-neutral-900/50 pb-4 relative z-10">
+          <CardTitle className="text-[11px] font-mono text-neutral-400 tracking-widest uppercase">Detalhamento Analítico (Auditoria)</CardTitle>
         </CardHeader>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto relative z-10">
           <table className="w-full text-left font-sans text-sm">
-            <thead className="bg-neutral-900 border-b border-neutral-800 text-neutral-400 text-xs uppercase tracking-wider">
+            <thead className="bg-[#121212]/50 border-b border-neutral-900 text-neutral-500 text-[10px] uppercase tracking-[0.2em] font-mono">
               <tr>
-                <th className="px-5 py-4 font-medium">Pedido</th>
-                <th className="px-5 py-4 font-medium">Método / Loja</th>
-                <th className="px-5 py-4 font-medium text-right">Cobrado do Cliente</th>
-                <th className="px-5 py-4 font-medium text-right">Custo Real Embutido</th>
-                <th className="px-5 py-4 font-medium text-right">Diferença</th>
-                <th className="px-5 py-4 font-medium text-right">Status Auditoria</th>
+                <th className="px-6 py-4 font-medium whitespace-nowrap">Nota da Ordem</th>
+                <th className="px-6 py-4 font-medium">Logística / Parceiro</th>
+                <th className="px-6 py-4 font-medium text-right">Faturamento (Frete)</th>
+                <th className="px-6 py-4 font-medium text-right">Liquidação Real</th>
+                <th className="px-6 py-4 font-medium text-right">Spread Absoluto</th>
+                <th className="px-6 py-4 font-medium text-right">Auditoria</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-800 text-neutral-300">
+            <tbody className="divide-y divide-neutral-900/50 text-neutral-300">
               {mockDeliveryCosts.map((item) => (
-                <tr key={item.id} className="hover:bg-neutral-900/50 transition-colors">
-                  <td className="px-5 py-3 font-mono text-white text-xs">{item.order}</td>
-                  <td className="px-5 py-3">
-                     <span className="block text-white font-medium">{item.method}</span>
-                     <span className="block text-[11px] text-neutral-500 mt-0.5">{item.store}</span>
+                <tr key={item.id} className="hover:bg-[#121212] transition-colors group">
+                  <td className="px-6 py-4 font-mono text-white text-[12px]">{item.order}</td>
+                  <td className="px-6 py-4">
+                     <span className="block text-white font-medium text-[13px] tracking-wide">{item.method}</span>
+                     <span className="block text-[10px] font-mono uppercase tracking-widest text-neutral-500 mt-1">{item.store}</span>
                   </td>
-                  <td className="px-5 py-3 text-right font-mono tracking-tight">{formatCurrency(item.charged)}</td>
-                  <td className="px-5 py-3 text-right">
+                  <td className="px-6 py-4 text-right font-mono text-[14px]">{formatCurrency(item.charged)}</td>
+                  <td className="px-6 py-4 text-right">
                      {item.realCost === 0 && item.method !== 'Retirada' ? (
-                       <button className="text-xs text-sky-400 underline underline-offset-2">Preencher Custo Real</button>
+                       <button className="text-[10px] uppercase tracking-widest font-mono text-pink-500 hover:text-pink-400 transition-colors">Definir Custo</button>
                      ) : (
-                       <span className="font-mono tracking-tight text-neutral-300">{formatCurrency(item.realCost)}</span>
+                       <span className="font-mono text-[14px] text-neutral-300 tabular-nums">{formatCurrency(item.realCost)}</span>
                      )}
                   </td>
-                  <td className="px-5 py-3 text-right">
+                  <td className="px-6 py-4 text-right">
                     <span className={cn(
-                      "font-mono tracking-tight text-sm",
+                      "font-mono text-[14px] tabular-nums",
                       item.diff < 0 ? "text-red-400" : item.diff > 0 ? "text-emerald-400" : "text-neutral-500"
                     )}>
                       {item.diff === 0 ? '--' : formatCurrency(item.diff)}
                     </span>
                   </td>
-                  <td className="px-5 py-3 text-right">
+                  <td className="px-6 py-4 text-right">
                      <span className={cn(
-                        "inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium tracking-wide border uppercase",
-                        item.status === 'ok' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
-                        item.status === 'alerta' ? "bg-red-500/10 text-red-500 border-red-500/20" :
-                        "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                        "inline-flex items-center px-2 py-1 rounded text-[9px] font-mono tracking-widest uppercase border",
+                        item.status === 'ok' ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
+                        item.status === 'alerta' ? "bg-red-500/10 text-red-500 border-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.2)]" :
+                        "bg-[#121212] text-neutral-400 border-neutral-800"
                       )}>
-                        {item.status}
+                        {item.status === 'ok' ? 'Regular' : item.status === 'alerta' ? 'Prejuízo' : 'Revisar'}
                       </span>
                   </td>
                 </tr>
