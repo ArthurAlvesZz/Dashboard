@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { UploadCloud, FileSpreadsheet, CheckCircle2, AlertTriangle, ArrowRight, Info, Eye, LucideIcon } from 'lucide-react';
+import { UploadCloud, FileSpreadsheet, CheckCircle2, AlertTriangle, ArrowRight, Info, DownloadCloud, FileText, XCircle, File } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Drawer } from '@/components/ui/Drawer';
 
 export function ImportCostsView() {
   const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
-  const [showPreview, setShowPreview] = useState(false);
+  const [selectedStore, setSelectedStore] = useState<'global' | 'araguari' | 'uberlandia'>('global');
 
   useEffect(() => {
     if (step === 4) {
@@ -16,228 +16,324 @@ export function ImportCostsView() {
   }, [step]);
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto animate-in fade-in zoom-in-95 duration-500">
-      <div className="flex items-center gap-2 mb-10 px-4">
-        {[1, 2, 3, 4, 5].map((s) => (
-          <div key={s} className="flex items-center gap-2 flex-1">
-             <div className={cn(
-              "flex flex-col gap-2 items-start shrink-0 relative",
-              step === s ? "opacity-100" : (step > s ? "opacity-100" : "opacity-40")
-            )}>
-              <div className={cn(
-                "h-1.5 w-12 rounded-full transition-all duration-500",
-                step >= s ? "bg-primary shadow-[0_0_10px_var(--primary)]" : "bg-muted"
-              )} />
-              <div className="absolute top-4 left-0 text-[10px] uppercase font-semibold tracking-wider whitespace-nowrap hidden sm:block">
-                <span className={cn(
-                  "transition-colors",
-                  step >= s ? "text-primary" : "text-muted-foreground"
-                )}>
-                  {s === 1 && "Importar"}
-                  {s === 2 && "Mapear"}
-                  {s === 3 && "Revisar"}
-                  {s === 4 && "Escrever"}
-                  {s === 5 && "Sucesso"}
-                </span>
-              </div>
-            </div>
-            {s < 5 && <div className={cn("h-px flex-1 transition-colors mx-2", step > s ? "bg-primary/30" : "bg-border")}></div>}
-          </div>
-        ))}
+    <div className="space-y-6 max-w-5xl mx-auto animate-in fade-in zoom-in-95 duration-500 pb-10">
+      
+      {/* HEADER */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Importar Custos de Produtos</h1>
+          <p className="text-sm font-medium text-muted-foreground mt-1">Atualize o custo médio por SKU via planilha</p>
+        </div>
+        <div className="px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-full flex items-center justify-center shadow-sm">
+          <span className="text-[11px] font-bold tracking-wider text-primary uppercase">414 produtos cadastrados</span>
+        </div>
+      </div>
+
+      {/* STEPPER VISUAL */}
+      <div className="flex justify-between items-center bg-card border border-border rounded-xl p-4 shadow-sm w-full overflow-x-auto">
+        <StepIndicator num={1} label="Upload" current={step} />
+        <div className={cn("h-px flex-1 mx-2 sm:mx-4 transition-colors", step > 1 ? "bg-primary" : "bg-border")} />
+        <StepIndicator num={2} label="Mapear" current={step} />
+        <div className={cn("h-px flex-1 mx-2 sm:mx-4 transition-colors", step > 2 ? "bg-primary" : "bg-border")} />
+        <StepIndicator num={3} label="Revisar" current={step} />
+        <div className={cn("h-px flex-1 mx-2 sm:mx-4 transition-colors", step > 3 ? "bg-primary" : "bg-border")} />
+        <StepIndicator num={4} label="Aplicar" current={step} />
+        <div className={cn("h-px flex-1 mx-2 sm:mx-4 transition-colors", step > 4 ? "bg-primary" : "bg-border")} />
+        <StepIndicator num={5} label="Concluído" current={step} />
       </div>
 
       {step === 1 && (
-        <Card className="bg-card border-border shadow-sm mt-4 relative overflow-hidden">
-          <div className="absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-primary/5 to-transparent pointer-events-none" />
-          <CardHeader>
-             <CardTitle className="font-semibold uppercase tracking-wider text-xs text-muted-foreground">Ponto de Injeção de Dados</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="border border-dashed border-border hover:border-primary/50 hover:bg-primary/5 transition-all bg-muted/10 rounded-xl p-16 flex flex-col items-center justify-center text-center cursor-pointer group" onClick={() => setStep(2)}>
-              <div className="w-20 h-20 bg-card border border-border group-hover:border-primary/30 rounded-full flex items-center justify-center mb-6 shadow-sm relative">
-                <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <UploadCloud className="w-8 h-8 text-muted-foreground group-hover:text-primary transition-colors relative z-10" />
-              </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors tracking-tight">Anexar Base de Dados</h3>
-              <p className="text-sm text-muted-foreground max-w-md">Arraste um documento XLSX ou CSV homologado. O sistema processará até 50.000 linhas por lote.</p>
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 space-y-6">
+          {/* SELETOR DE LOJA & UPLOAD */}
+          <Card className="bg-card border-border shadow-sm">
+            <CardContent className="p-6 sm:p-8 space-y-8">
               
-              <div className="mt-8 flex gap-2">
-                 <span className="px-3 py-1 bg-muted border border-border rounded-md font-mono text-[10px] text-muted-foreground uppercase font-semibold">.CSV</span>
-                 <span className="px-3 py-1 bg-muted border border-border rounded-md font-mono text-[10px] text-muted-foreground uppercase font-semibold">.XLSX</span>
-              </div>
-            </div>
-
-             <div className="flex flex-col gap-2">
-                <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground px-1">Restrição de Loja (Origem)</label>
-                <div className="bg-muted/30 border border-border p-1 rounded-lg flex shadow-sm">
-                   <select className="w-full bg-transparent border-0 text-foreground text-[13px] font-medium tracking-wide focus:ring-0 p-3 outline-none cursor-pointer">
-                      <option>Aplicar a todo o sistema (Global)</option>
-                      <option>Restringir: Somente Araguari</option>
-                      <option>Restringir: Somente Uberlândia</option>
-                   </select>
+              {/* Seletor de Loja */}
+              <div className="flex flex-col gap-3">
+                <span className="text-[11px] uppercase font-bold tracking-wider text-muted-foreground">Aplicar custos para:</span>
+                <div className="flex flex-col sm:flex-row gap-2 text-sm font-semibold">
+                  <button 
+                    onClick={() => setSelectedStore('global')} 
+                    className={cn("px-4 py-2.5 rounded-lg border transition-all active:scale-[0.98]", selectedStore === 'global' ? "bg-muted text-foreground shadow-sm border-border" : "bg-transparent border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground")}
+                  >
+                    Global (todas as lojas)
+                  </button>
+                  <button 
+                    onClick={() => setSelectedStore('araguari')} 
+                    className={cn("px-4 py-2.5 rounded-lg border transition-all active:scale-[0.98]", selectedStore === 'araguari' ? "bg-muted text-foreground shadow-sm border-border" : "bg-transparent border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground")}
+                  >
+                    Araguari
+                  </button>
+                  <button 
+                    onClick={() => setSelectedStore('uberlandia')} 
+                    className={cn("px-4 py-2.5 rounded-lg border transition-all active:scale-[0.98]", selectedStore === 'uberlandia' ? "bg-muted text-foreground shadow-sm border-border" : "bg-transparent border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground")}
+                  >
+                    Uberlândia
+                  </button>
                 </div>
-             </div>
-          </CardContent>
-        </Card>
-      )}
+              </div>
 
-      {step === 2 && (
-        <Card className="bg-card border-border shadow-sm mt-4 animate-in fade-in duration-500">
-          <CardHeader>
-             <CardTitle className="font-semibold uppercase tracking-wider text-xs text-muted-foreground">Resolução de Colunas</CardTitle>
-          </CardHeader>
-          <CardContent>
-             <div className="space-y-4">
-               <div className="bg-muted/30 border border-border p-5 rounded-lg flex items-center justify-between group">
-                  <div>
-                    <span className="block text-sm font-semibold text-foreground tracking-tight">ID Rastreador (SKU)</span>
-                    <span className="text-[11px] text-muted-foreground mt-1 block">Chave primária obrigatória</span>
-                  </div>
-                  <select className="bg-card border border-border text-[13px] font-medium text-foreground rounded-md px-4 py-2.5 focus:outline-none focus:border-primary transition-colors w-48 shadow-sm">
-                     <option>A (Auto-detectado)</option>
-                     <option>B (Código Local)</option>
-                  </select>
-               </div>
-               
-               <div className="bg-muted/30 border border-border p-5 rounded-lg flex items-center justify-between group">
-                  <div>
-                    <span className="block text-sm font-semibold text-foreground tracking-tight">Despesa Mercadoria (CMV / R$)</span>
-                    <span className="text-[11px] text-muted-foreground mt-1 block">Custo absoluto por unidade</span>
-                  </div>
-                  <select className="bg-card border border-border text-[13px] font-medium text-foreground rounded-md px-4 py-2.5 focus:outline-none focus:border-primary transition-colors w-48 shadow-sm">
-                     <option>C (Custo Base)</option>
-                     <option>D (Custo Integrado)</option>
-                  </select>
-               </div>
-               
-               <div className="pt-8 flex justify-end">
-                 <button onClick={() => setStep(3)} className="bg-primary text-primary-foreground font-semibold uppercase tracking-wider text-[11px] px-8 py-3.5 rounded-lg hover:bg-primary/90 transition-transform active:scale-95 shadow-sm flex items-center gap-2">
-                    Analisar & Compilar
-                    <ArrowRight className="w-3.5 h-3.5" />
-                 </button>
-               </div>
-             </div>
-          </CardContent>
-        </Card>
+              {/* Seção de Upload */}
+              <div className="border-2 border-dashed border-border hover:border-primary/50 hover:bg-muted/10 transition-all rounded-xl p-10 flex flex-col items-center justify-center text-center cursor-pointer group bg-card relative overflow-hidden" onClick={() => setStep(3)}>
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="w-16 h-16 bg-muted border border-border rounded-full flex items-center justify-center mb-5 shadow-sm relative group-hover:scale-110 transition-transform duration-300">
+                  <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <UploadCloud className="w-8 h-8 text-muted-foreground group-hover:text-primary transition-colors relative z-10 animate-bounce" style={{ animationDuration: '3s' }} />
+                </div>
+                <h3 className="text-lg font-bold text-foreground tracking-tight group-hover:text-primary transition-colors relative z-10">Arraste seu arquivo XLSX ou CSV aqui</h3>
+                <p className="text-sm font-medium text-muted-foreground mt-1 relative z-10">ou clique para selecionar</p>
+                <div className="flex gap-2 mt-6 relative z-10">
+                  <span className="px-2 py-1 bg-muted font-mono text-[10px] uppercase font-bold tracking-wider rounded text-muted-foreground border border-border shadow-sm">[.XLSX]</span>
+                  <span className="px-2 py-1 bg-muted font-mono text-[10px] uppercase font-bold tracking-wider rounded text-muted-foreground border border-border shadow-sm">[.CSV]</span>
+                </div>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mt-6 relative z-10">Máximo 10MB</p>
+              </div>
+
+            </CardContent>
+          </Card>
+
+          {/* HISTÓRICO */}
+          <Card className="bg-card border-border shadow-sm">
+            <CardHeader className="border-b border-border">
+              <CardTitle className="text-[11px] font-semibold tracking-wider uppercase text-muted-foreground flex items-center gap-2">
+                <FileText className="w-4 h-4 text-muted-foreground" />
+                Histórico Recente
+              </CardTitle>
+            </CardHeader>
+            <div className="p-0 overflow-x-auto">
+               <table className="w-full text-left font-sans text-sm">
+                  <thead className="text-muted-foreground text-[10px] uppercase font-semibold tracking-wider bg-muted/30 border-b border-border">
+                     <tr>
+                        <th className="py-3 px-6 whitespace-nowrap">Data</th>
+                        <th className="py-3 px-6 whitespace-nowrap">Arquivo</th>
+                        <th className="py-3 px-6 whitespace-nowrap">Loja</th>
+                        <th className="py-3 px-6 whitespace-nowrap">Status</th>
+                        <th className="py-3 px-6 whitespace-nowrap text-right">Usuário</th>
+                     </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border text-foreground">
+                     <tr className="hover:bg-muted/30 transition-colors group">
+                        <td className="py-4 px-6 font-mono text-[12px] font-semibold text-muted-foreground group-hover:text-foreground transition-colors whitespace-nowrap">12/06 14:30</td>
+                        <td className="py-4 px-6 font-semibold whitespace-nowrap flex items-center gap-2"><File className="w-3.5 h-3.5 text-muted-foreground" /> custos.xlsx</td>
+                        <td className="py-4 px-6"><span className="px-2 py-1 bg-muted rounded text-[10px] font-bold uppercase tracking-wider border border-border">Global</span></td>
+                        <td className="py-4 px-6">
+                           <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[10px] font-bold uppercase tracking-wider rounded-md whitespace-nowrap">414 Atualizados</span>
+                        </td>
+                        <td className="py-4 px-6 text-right font-medium text-muted-foreground">Arthur</td>
+                     </tr>
+                     <tr className="hover:bg-muted/30 transition-colors group">
+                        <td className="py-4 px-6 font-mono text-[12px] font-semibold text-muted-foreground group-hover:text-foreground transition-colors whitespace-nowrap">10/06 09:15</td>
+                        <td className="py-4 px-6 font-semibold whitespace-nowrap flex items-center gap-2"><File className="w-3.5 h-3.5 text-muted-foreground" /> precos_junho.csv</td>
+                        <td className="py-4 px-6"><span className="px-2 py-1 bg-muted rounded text-[10px] font-bold uppercase tracking-wider border border-border">Araguari</span></td>
+                        <td className="py-4 px-6">
+                           <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[10px] font-bold uppercase tracking-wider rounded-md whitespace-nowrap">380 Atualizados</span>
+                        </td>
+                        <td className="py-4 px-6 text-right font-medium text-muted-foreground">Sistema</td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+          </Card>
+        </div>
       )}
 
       {step === 3 && (
-        <Card className="bg-card border-border shadow-sm mt-4 animate-in fade-in duration-500">
-          <CardHeader className="border-b border-border pb-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-primary/10 border border-primary/20 rounded-xl relative">
-                  <div className="absolute inset-0 bg-primary/20 blur-lg rounded-xl opacity-50"></div>
-                  <FileSpreadsheet className="w-6 h-6 text-primary relative z-10" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-foreground tracking-tight">Documento Processado</h3>
-                  <p className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground mt-1">Ready for execution</p>
-                </div>
-              </div>
-               <button onClick={() => setShowPreview(true)} className="flex items-center justify-center gap-2 text-[11px] uppercase tracking-wider font-semibold text-muted-foreground bg-muted hover:bg-accent hover:text-foreground border border-border px-5 py-2.5 rounded-lg transition-colors">
-                  <Eye className="w-3.5 h-3.5" />
-                  Abrir Auditoria (Log)
-               </button>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-8">
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <SummaryStat icon={CheckCircle2} label="Conformidade" value="414" color="text-emerald-500" />
-                <SummaryStat icon={AlertTriangle} label="Sobrescrever (R$ 0)" value="2" color="text-amber-500" />
-                <SummaryStat icon={AlertTriangle} label="Chaves Ausentes" value="0" color="text-destructive" />
-                <SummaryStat icon={Info} label="Clean-up (Auto)" value="2" color="text-sky-500" sub="Sanitização aplicada" />
-              </div>
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+          
+          {/* CARDS DE ESTATÍSTICA */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+             <StatCard label="Linhas Válidas" value="412" icon={CheckCircle2} color="text-emerald-500" />
+             <StatCard label="Custo Zero" value="2" icon={AlertTriangle} color="text-amber-500" />
+             <StatCard label="Não Encontrados" value="0" icon={XCircle} color="text-destructive" />
+             <StatCard label="Normalizados" value="1" icon={Info} color="text-sky-500" />
+          </div>
 
-              <div className="pt-8 flex gap-4">
-                <button onClick={() => setStep(1)} className="px-6 py-3.5 bg-muted border border-border text-muted-foreground font-semibold text-[11px] uppercase tracking-wider rounded-lg hover:bg-accent hover:text-foreground transition-colors">
-                  Cancelar Operação
-                </button>
-                <button onClick={() => setStep(4)} className="flex-1 flex justify-center items-center gap-3 px-6 py-3.5 bg-primary text-primary-foreground font-semibold text-[11px] uppercase tracking-wider rounded-lg hover:bg-primary/90 transition-all active:scale-95 shadow-sm">
-                  Confirmar Escrita
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
+          {/* TABELA DE PRÉVIA */}
+          <Card className="bg-card border-border shadow-sm mt-6">
+            <CardHeader className="border-b border-border">
+               <CardTitle className="text-sm font-bold tracking-tight text-foreground flex items-center justify-between">
+                 Prévia dos Dados
+                 <span className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase">Ação Pendente</span>
+               </CardTitle>
+            </CardHeader>
+            <div className="p-0 overflow-x-auto">
+               <table className="w-full text-left font-sans text-sm">
+                  <thead className="bg-muted/30 border-b border-border text-muted-foreground text-[10px] uppercase tracking-wider font-semibold">
+                     <tr>
+                        <th className="py-3 px-6 whitespace-nowrap">Status</th>
+                        <th className="py-3 px-6 whitespace-nowrap">SKU / Produto</th>
+                        <th className="py-3 px-6 text-right whitespace-nowrap">Custo Atual</th>
+                        <th className="py-3 px-6 text-right whitespace-nowrap">Custo Novo</th>
+                        <th className="py-3 px-6 text-right whitespace-nowrap">Diferença</th>
+                     </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/50 text-foreground">
+                     <PreviewRow 
+                        sku="ADS01" 
+                        current="R$ 44,00" 
+                        novo="R$ 45,50" 
+                        diff="+R$ 1,50" 
+                        diffColor="text-emerald-500"
+                        status="Atualizar" 
+                        statusColor="bg-emerald-500/10 text-emerald-500 border-emerald-500/20" 
+                     />
+                     <PreviewRow 
+                        sku="ADS02" 
+                        current="R$ 44,00" 
+                        novo="R$ 45,50" 
+                        diff="+R$ 1,50" 
+                        diffColor="text-emerald-500"
+                        status="Atualizar" 
+                        statusColor="bg-emerald-500/10 text-emerald-500 border-emerald-500/20" 
+                     />
+                     <PreviewRow 
+                        sku="CON07" 
+                        current="R$ 0,00" 
+                        novo="R$ 0,00" 
+                        diff="-" 
+                        diffColor="text-muted-foreground"
+                        status="Revisar" 
+                        statusColor="bg-amber-500/10 text-amber-500 border-amber-500/20" 
+                     />
+                     <PreviewRow 
+                        sku="Verde P RAYSSA" 
+                        current="R$ 0,00" 
+                        novo="R$ 0,00" 
+                        diff="-" 
+                        diffColor="text-muted-foreground"
+                        status="Revisar" 
+                        statusColor="bg-amber-500/10 text-amber-500 border-amber-500/20" 
+                     />
+                     <PreviewRow 
+                        sku="Creme PRT50" 
+                        current="R$ 110,00" 
+                        novo="R$ 110,00" 
+                        diff="Espaço corrigido" 
+                        diffColor="text-sky-500 text-[11px]"
+                        status="Normalizado" 
+                        statusColor="bg-sky-500/10 text-sky-500 border-sky-500/20" 
+                     />
+                     <PreviewRow 
+                        sku="Total geral" 
+                        current="-" 
+                        novo="-" 
+                        diff="-" 
+                        diffColor="text-muted-foreground"
+                        status="Ignorado" 
+                        statusColor="bg-muted text-muted-foreground border-border" 
+                        isFaded
+                     />
+                  </tbody>
+               </table>
             </div>
+          </Card>
+
+          {/* BOTÕES DE AÇÃO */}
+          <div className="flex flex-col sm:flex-row gap-3 pt-6">
+             <button onClick={() => setStep(1)} className="px-6 py-3.5 bg-muted border border-border text-foreground font-bold text-[11px] uppercase tracking-wider rounded-lg hover:bg-muted/80 transition-colors shadow-sm w-full sm:w-auto">
+               Cancelar
+             </button>
+             <button className="px-6 py-3.5 bg-transparent text-primary hover:bg-primary/5 font-bold text-[11px] uppercase tracking-wider rounded-lg transition-colors flex items-center justify-center gap-2 w-full sm:w-auto">
+               <DownloadCloud className="w-4 h-4" />
+               Baixar Relatório
+             </button>
+             <div className="flex-1"></div>
+             <button onClick={() => setStep(4)} className="px-8 py-3.5 bg-primary text-primary-foreground font-bold text-[11px] uppercase tracking-wider rounded-lg hover:bg-primary/90 transition-transform active:scale-95 shadow-sm flex items-center justify-center gap-2 w-full sm:w-auto">
+               Aplicar Importação
+               <ArrowRight className="w-4 h-4" />
+             </button>
+          </div>
+        </div>
+      )}
+
+      {(step === 4 || step === 5) && (
+        <Card className="bg-card border-border shadow-sm mt-4 animate-in fade-in duration-500 relative overflow-hidden">
+          {step === 5 && <div className="absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-emerald-500/5 to-transparent pointer-events-none" />}
+          <CardContent className="p-16 flex flex-col items-center justify-center text-center relative z-10">
+            {step === 4 ? (
+              <>
+                <div className="w-20 h-20 border-2 border-muted border-t-primary rounded-full animate-spin mb-8 relative">
+                   <div className="absolute inset-0 border-2 border-transparent border-t-primary/50 rounded-full animate-spin opacity-50 blur-sm"></div>
+                </div>
+                <h3 className="text-2xl font-bold text-foreground mb-2 tracking-tight">Executando Atualização...</h3>
+                <p className="text-sm font-medium text-muted-foreground">Aplicando novos custos em 414 SKUs no catálogo.</p>
+              </>
+            ) : (
+              <div className="animate-in zoom-in-95 duration-500">
+                <div className="w-24 h-24 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center mb-8 mx-auto relative group">
+                  <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full opacity-50"></div>
+                  <CheckCircle2 className="w-12 h-12 text-emerald-500 relative z-10 group-hover:scale-110 transition-transform" />
+                </div>
+                <h3 className="text-2xl font-bold text-foreground mb-3 tracking-tight">Importação Finalizada</h3>
+                <p className="text-sm font-medium text-muted-foreground mb-10 max-w-md mx-auto leading-relaxed">
+                   Os custos foram atualizados com sucesso. Registros com custo zero foram revisados pelas políticas da plataforma.
+                </p>
+                <div className="flex gap-4 justify-center flex-col sm:flex-row">
+                  <button className="px-6 py-3.5 bg-transparent border border-border text-foreground font-bold text-[11px] uppercase tracking-wider rounded-lg hover:bg-muted transition-colors shadow-sm w-full sm:w-auto">
+                    Ver Catálogo
+                  </button>
+                  <button onClick={() => setStep(1)} className="px-8 py-3.5 bg-primary text-primary-foreground font-bold text-[11px] uppercase tracking-wider rounded-lg hover:bg-primary/90 transition-colors shadow-sm w-full sm:w-auto">
+                    Nova Importação
+                  </button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
 
-      {(step === 4 || step === 5) && (
-         <Card className="bg-card border-border shadow-sm mt-4 animate-in fade-in duration-500 relative overflow-hidden">
-            {step === 5 && <div className="absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-emerald-500/10 to-transparent pointer-events-none" />}
-            <CardContent className="p-16 flex flex-col items-center justify-center text-center relative z-10">
-              {step === 4 ? (
-                <>
-                  <div className="w-20 h-20 border-2 border-muted border-t-primary rounded-full animate-spin mb-8 relative">
-                     <div className="absolute inset-0 border-2 border-transparent border-t-primary/50 rounded-full animate-spin opacity-50 blur-sm"></div>
-                  </div>
-                  <h3 className="text-2xl font-bold text-foreground mb-3 tracking-tight">Executando Escrita...</h3>
-                  <p className="text-sm font-mono text-muted-foreground">Mutando 414 registros no banco de dados.</p>
-                </>
-              ) : (
-                <>
-                  <div className="w-24 h-24 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center mb-8 relative">
-                    <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full opacity-50"></div>
-                    <CheckCircle2 className="w-12 h-12 text-emerald-500 relative z-10" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-foreground mb-3 tracking-tight">Sincronização Concluída</h3>
-                  <p className="text-sm text-muted-foreground mb-10 max-w-lg leading-relaxed">
-                     A operação de lote foi finalizada com sucesso. 414 registros atualizados. Chaves com valor absoluto igual a zero foram ignoradas conforme regra de negócio e continuam bloqueadas para venda.
-                  </p>
-                  <button onClick={() => setStep(1)} className="px-8 py-3 bg-muted border border-border text-muted-foreground font-semibold text-[11px] uppercase tracking-wider rounded-lg hover:bg-accent hover:text-foreground transition-colors">
-                    Iniciar Nova Operação
-                  </button>
-                </>
-              )}
-            </CardContent>
-         </Card>
-      )}
-
-      <Drawer isOpen={showPreview} onClose={() => setShowPreview(false)} title="Console de Auditoria (Prévia)">
-          <div className="space-y-6 mt-4">
-             <div className="bg-amber-500/10 text-amber-500 p-4 rounded-xl text-sm border border-amber-500/20 flex gap-3 shadow-sm">
-                <AlertTriangle className="w-5 h-5 shrink-0" />
-                <p className="leading-relaxed text-[13px] font-medium">
-                  Aviso Estrutural: 2 SKUs (CON07, Verde P RAYSSA) detectados com valor numérico R$ 0,00 na matriz.
-                  Por política, valores nulos <strong className="font-semibold text-amber-600 dark:text-amber-400">não efetuam "override"</strong> num custo estabelecido, a fim de proteger a exibição do produto.
-                </p>
-             </div>
-             <table className="w-full text-left text-sm font-sans mb-4">
-                <thead className="text-muted-foreground text-[10px] uppercase font-semibold tracking-wider border-b border-border bg-muted/30">
-                   <tr>
-                      <th className="py-3 px-4 font-medium">Identificador Oculto</th>
-                      <th className="py-3 px-4 font-medium text-right">Valor Capturado</th>
-                      <th className="py-3 px-4 font-medium text-right">Status do Evento</th>
-                   </tr>
-                </thead>
-                <tbody className="divide-y divide-border/50 text-foreground">
-                   <tr className="hover:bg-muted/30"><td className="py-3 px-4 font-mono text-xs font-semibold">ADS01</td><td className="py-3 px-4 text-right tabular-nums text-emerald-500 font-mono">R$ 45,50</td><td className="py-3 px-4 text-right"><span className="text-emerald-500 text-[10px] uppercase font-bold tracking-wider">Escrita Segura</span></td></tr>
-                   <tr className="hover:bg-muted/30"><td className="py-3 px-4 font-mono text-xs font-semibold">ADS02</td><td className="py-3 px-4 text-right tabular-nums text-emerald-500 font-mono">R$ 45,50</td><td className="py-3 px-4 text-right"><span className="text-emerald-500 text-[10px] uppercase font-bold tracking-wider">Escrita Segura</span></td></tr>
-                   <tr className="bg-amber-500/5 hover:bg-amber-500/10"><td className="py-3 px-4 font-mono text-xs font-semibold text-amber-500">CON07</td><td className="py-3 px-4 text-right tabular-nums text-amber-500 font-mono">R$ 0,00</td><td className="py-3 px-4 text-right"><span className="text-amber-500 text-[10px] uppercase font-bold tracking-wider drop-shadow">Pular Override</span></td></tr>
-                   <tr className="hover:bg-muted/30"><td className="py-3 px-4 font-mono text-xs font-semibold text-sky-500">Creme PRT50.</td><td className="py-3 px-4 text-right tabular-nums text-emerald-500 font-mono">R$ 110,00</td><td className="py-3 px-4 text-right"><span className="text-sky-500 text-[10px] uppercase font-bold tracking-wider">Espaço Sanitizado</span></td></tr>
-                   <tr className="hover:bg-muted/30 text-muted-foreground"><td className="py-3 px-4 text-xs font-semibold">Total geral</td><td className="py-3 px-4 text-right tabular-nums">-</td><td className="py-3 px-4 text-right"><span className="text-[10px] uppercase font-bold tracking-wider">Linha Descartada</span></td></tr>
-                </tbody>
-             </table>
-          </div>
-      </Drawer>
     </div>
   );
 }
 
-function SummaryStat({ icon: Icon, label, value, color, sub }: { icon: LucideIcon, label: string, value: string, color: string, sub?: string }) {
+// COMPONENTES AUXILIARES
+
+function StepIndicator({ num, label, current }: { num: number, label: string, current: number }) {
+  const isCompleted = current > num;
+  const isActive = current === num;
+  
   return (
-    <div className="bg-muted/20 border border-border p-5 rounded-xl flex flex-col gap-3 shadow-sm relative overflow-hidden group">
-      <div className="absolute right-0 top-0 w-24 h-full bg-gradient-to-l from-primary/5 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
-      <div className="flex justify-between items-start relative z-10">
-        <span className="text-[10px] uppercase font-semibold tracking-wider text-muted-foreground leading-tight pr-4">{label}</span>
-        <Icon className={cn("w-4 h-4 shrink-0 mt-0.5", color)} />
+    <div className={cn("flex flex-col items-center gap-2", isActive || isCompleted ? "opacity-100" : "opacity-40 grayscale")}>
+      <div className={cn(
+        "w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-bold transition-all shadow-sm",
+        isActive ? "bg-primary text-primary-foreground ring-4 ring-primary/20" : 
+        isCompleted ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground border border-border"
+      )}>
+        {isCompleted ? <CheckCircle2 className="w-4 h-4" /> : num}
       </div>
-      <div className="mt-1 relative z-10">
-        <span className="text-2xl font-bold font-mono tracking-tight text-foreground">{value}</span>
-        {sub && <span className="block mt-1.5 text-[10px] text-muted-foreground uppercase font-semibold tracking-wider leading-tight">{sub}</span>}
-      </div>
+      <span className={cn(
+        "text-[10px] uppercase font-bold tracking-wider hidden sm:block",
+        isActive ? "text-primary" : "text-muted-foreground"
+      )}>{label}</span>
     </div>
+  );
+}
+
+function StatCard({ label, value, icon: Icon, color }: { label: string, value: string, icon: any, color: string }) {
+  return (
+    <div className="bg-card border border-border p-5 rounded-xl shadow-sm flex flex-col gap-3 group relative overflow-hidden">
+      <div className="absolute right-0 top-0 w-full h-full bg-gradient-to-l from-current/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" style={{ color: 'inherit' }} />
+      <div className="flex justify-between items-start relative z-10">
+        <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">{label}</span>
+        <Icon className={cn("w-5 h-5", color)} />
+      </div>
+      <span className="text-2xl font-bold text-foreground tracking-tight font-mono relative z-10">{value}</span>
+    </div>
+  );
+}
+
+function PreviewRow({ sku, current, novo, diff, diffColor, status, statusColor, isFaded }: any) {
+  return (
+    <tr className={cn("hover:bg-muted/30 transition-colors", isFaded && "opacity-50")}>
+      <td className="py-4 px-6 whitespace-nowrap">
+        <span className={cn("px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md border", statusColor)}>
+          {status}
+        </span>
+      </td>
+      <td className="py-4 px-6 font-mono font-semibold text-[13px]">{sku}</td>
+      <td className="py-4 px-6 text-right font-mono text-[13px] text-muted-foreground font-medium">{current}</td>
+      <td className="py-4 px-6 text-right font-mono text-[13px] font-bold text-foreground">{novo}</td>
+      <td className={cn("py-4 px-6 text-right font-mono text-[13px] font-bold", diffColor)}>{diff}</td>
+    </tr>
   );
 }

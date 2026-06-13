@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { mockBusinessCosts } from '@/lib/mockData';
 import { formatCurrency, cn } from '@/lib/utils';
-import { Search, Plus, Filter, Calendar as CalendarIcon, Repeat, MoreHorizontal, Check } from 'lucide-react';
+import { Search, Plus, Filter, Calendar as CalendarIcon, Repeat, MoreHorizontal, Check, Anchor, Activity, Tags } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Drawer } from '@/components/ui/Drawer';
@@ -13,79 +13,102 @@ export function BusinessCostsView() {
   const [costToDelete, setCostToDelete] = useState<typeof mockBusinessCosts[0] | null>(null);
 
   // Deriving stats from mockData for visual effect instead of hardcoding
-  const paidStats = mockBusinessCosts.filter(c => c.status === 'pago').reduce((acc, c) => acc + c.value, 0);
-  const openStats = mockBusinessCosts.filter(c => c.status !== 'pago').reduce((acc, c) => acc + c.value, 0);
+  const fixedCosts = mockBusinessCosts.filter(c => c.type === 'Custo Fixo').reduce((acc, c) => acc + c.value, 0);
+  const variableCosts = mockBusinessCosts.filter(c => c.type === 'Custo Variável').reduce((acc, c) => acc + c.value, 0);
+
+  const totalVencidos = 1200; // Mock stat secondary
+  const totalPagos = fixedCosts + variableCosts - 4500; // Mock stat secondary
 
   return (
-    <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
+    <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500 pb-10">
       
+      {/* HEADER */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Custos da Empresa</h1>
+          <p className="text-sm font-medium text-muted-foreground mt-0.5">Gestão de contas a pagar, custos fixos e variáveis.</p>
+        </div>
+        <div className="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+           <button onClick={() => setIsCategoriesOpen(true)} className="flex-1 sm:flex-none flex justify-center items-center gap-2 px-4 py-2 bg-muted text-foreground text-xs font-bold uppercase tracking-wider rounded-md hover:bg-muted/80 transition-colors border border-border shadow-sm">
+            <Tags className="w-4 h-4" /> Categorias
+          </button>
+          <button onClick={() => setIsNewExpenseOpen(true)} className="flex-1 sm:flex-none flex justify-center items-center gap-2 px-5 py-2 bg-primary text-primary-foreground text-xs font-bold uppercase tracking-wider rounded-md hover:bg-primary/90 transition-transform active:scale-95 shadow-sm">
+            <Plus className="w-4 h-4" /> Nova Conta
+          </button>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="bg-card border-border shadow-sm relative overflow-hidden group">
-          <div className="absolute right-0 top-0 w-32 h-full bg-gradient-to-l from-emerald-500/10 to-transparent opacity-50 group-hover:opacity-100 transition-opacity pointer-events-none" />
-          <CardContent className="p-8 relative z-10">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Custos Operacionais Pagos</h3>
+        <Card className="bg-card border-border shadow-sm relative overflow-hidden group hover:border-primary/50 transition-colors">
+          <div className="absolute right-0 top-0 w-48 h-full bg-gradient-to-l from-sky-500/10 to-transparent opacity-50 group-hover:opacity-100 transition-opacity pointer-events-none" />
+          <CardContent className="p-8 relative z-10 flex gap-6 items-center">
+            <div className="w-14 h-14 bg-sky-500/10 text-sky-500 rounded-xl flex items-center justify-center border border-sky-500/20 shrink-0 shadow-sm">
+              <Anchor className="w-7 h-7" />
             </div>
-            <div className="text-3xl font-bold text-foreground tracking-tight mt-4 flex items-baseline gap-1.5">
-               <span className="text-lg text-muted-foreground font-normal">R$</span>
-               {formatCurrency(paidStats || 12000).replace('R$ ', '')}
+            <div className="flex-1">
+              <h3 className="text-sm font-bold text-muted-foreground tracking-tight">Custos Fixos</h3>
+              <div className="text-3xl font-bold text-foreground tracking-tight mt-1 flex items-baseline gap-1">
+                 {formatCurrency(fixedCosts || 22000).replace('R$ ', 'R$')}
+              </div>
+              <p className="text-xs font-medium text-muted-foreground mt-2">Corresponde a 65% das despesas.</p>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border shadow-sm relative overflow-hidden group">
-          <div className="absolute right-0 top-0 w-32 h-full bg-gradient-to-l from-amber-500/10 to-transparent opacity-50 group-hover:opacity-100 transition-opacity pointer-events-none" />
-          <CardContent className="p-8 relative z-10">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]"></div>
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Despesas em Aberto</h3>
+
+        <Card className="bg-card border-border shadow-sm relative overflow-hidden group hover:border-primary/50 transition-colors">
+          <div className="absolute right-0 top-0 w-48 h-full bg-gradient-to-l from-amber-500/10 to-transparent opacity-50 group-hover:opacity-100 transition-opacity pointer-events-none" />
+          <CardContent className="p-8 relative z-10 flex gap-6 items-center">
+            <div className="w-14 h-14 bg-amber-500/10 text-amber-500 rounded-xl flex items-center justify-center border border-amber-500/20 shrink-0 shadow-sm">
+              <Activity className="w-7 h-7" />
             </div>
-            <div className="text-3xl font-bold text-foreground tracking-tight mt-4 flex items-baseline gap-1.5">
-               <span className="text-lg text-muted-foreground font-normal">R$</span>
-               {formatCurrency(openStats || 4500).replace('R$ ', '')}
+            <div className="flex-1">
+              <h3 className="text-sm font-bold text-muted-foreground tracking-tight">Custos Variáveis</h3>
+              <div className="text-3xl font-bold text-foreground tracking-tight mt-1 flex items-baseline gap-1">
+                 {formatCurrency(variableCosts || 12000).replace('R$ ', 'R$')}
+              </div>
+              <p className="text-xs font-medium text-muted-foreground mt-2">Corresponde a 35% das despesas.</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between pt-6">
-        <div className="relative max-w-md w-full flex items-center gap-2 group">
+      {/* FILTER & SEARCH ROW */}
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between pt-2">
+        <div className="flex items-center gap-3 text-[11px] font-bold uppercase tracking-wider">
+           <span className="text-muted-foreground">Posição:</span>
+           <span className="px-2 py-1 bg-emerald-500/10 text-emerald-500 rounded border border-emerald-500/20 shadow-sm">R$ {formatCurrency(totalPagos).replace('R$ ', '')} Pagos</span>
+           <span className="px-2 py-1 bg-muted border border-border text-foreground rounded shadow-sm">R$ 4.500 Aberto</span>
+           <span className="px-2 py-1 bg-destructive/10 text-destructive rounded border border-destructive/20 shadow-sm">R$ {formatCurrency(totalVencidos).replace('R$ ', '')} Vencidos</span>
+        </div>
+        <div className="relative max-w-sm w-full flex items-center gap-2 group">
           <div className="relative flex-1">
-             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-foreground transition-colors" />
             <input 
               type="text" 
-              placeholder="Buscar por descrição, classificação..." 
-              className="w-full bg-card border border-border shadow-sm rounded-lg pl-10 pr-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/50"
+              placeholder="Buscar fornecedor, fatura..." 
+              className="w-full bg-card border border-border rounded-md pl-9 pr-4 py-2 text-sm text-foreground focus:outline-none focus:border-primary/50 shadow-sm transition-all placeholder:text-muted-foreground/60"
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-card border border-border text-foreground text-xs font-medium rounded-lg hover:bg-accent transition-all shrink-0 shadow-sm">
-            <Filter className="w-4 h-4 text-muted-foreground" />
+          <button className="flex items-center gap-2 px-3 py-2 bg-card border border-border text-foreground text-xs font-bold tracking-wider uppercase rounded-md hover:bg-muted/80 transition-colors shrink-0 shadow-sm">
+            <Filter className="w-3.5 h-3.5 text-muted-foreground" />
             Filtros
-          </button>
-        </div>
-        <div className="flex gap-2 w-full sm:w-auto shrink-0">
-           <button onClick={() => setIsCategoriesOpen(true)} className="flex-1 sm:flex-none flex justify-center items-center gap-2 px-4 py-2.5 bg-muted text-foreground text-xs font-semibold rounded-lg hover:bg-accent transition-colors">
-            Plano de Contas
-          </button>
-          <button onClick={() => setIsNewExpenseOpen(true)} className="flex-1 sm:flex-none flex justify-center items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground text-xs font-bold rounded-lg hover:bg-primary/90 transition-transform active:scale-95 shadow-sm">
-            <Plus className="w-4 h-4" />
-            Nova Obrigação
           </button>
         </div>
       </div>
 
       <Card className="bg-card border-border shadow-sm relative overflow-hidden mt-4">
-        <div className="absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-primary/5 to-transparent pointer-events-none" />
-        <div className="overflow-x-auto relative z-10">
-          <table className="w-full text-left font-sans text-sm min-w-[800px]">
-            <thead className="bg-muted/30 border-b border-border text-muted-foreground text-[11px] uppercase tracking-wider font-semibold">
+        <div className="overflow-x-auto relative z-10 custom-scrollbar">
+          <table className="w-full text-left font-sans text-sm min-w-[900px]">
+             {/* Vencimento, Pagamento, Categoria, Fornecedor, Loja, Valor, Situação */}
+            <thead className="bg-muted/20 border-b border-border text-muted-foreground text-[10px] uppercase tracking-wider font-semibold">
               <tr>
-                <th className="px-6 py-4 font-medium whitespace-nowrap">Vencimento</th>
-                <th className="px-6 py-4 font-medium">Classificação Contábil</th>
-                <th className="px-6 py-4 font-medium">Centro de Custo (Rateio)</th>
-                <th className="px-6 py-4 font-medium text-right">Valor Líquido</th>
-                <th className="px-6 py-4 font-medium text-right">Situação</th>
-                <th className="px-5 py-4 font-medium text-right w-16"></th>
+                <th className="px-6 py-4 font-semibold whitespace-nowrap">Venc./Pag.</th>
+                <th className="px-6 py-4 font-semibold">Fornecedor / Fatura</th>
+                <th className="px-6 py-4 font-semibold">Categoria</th>
+                <th className="px-6 py-4 font-semibold">C. Custo</th>
+                <th className="px-6 py-4 font-semibold text-right">Valor Líquido</th>
+                <th className="px-6 py-4 font-semibold text-right">Situação</th>
+                <th className="px-4 py-4 font-semibold text-right w-12"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50 text-foreground">
@@ -95,61 +118,65 @@ export function BusinessCostsView() {
 
                  if (cost.status === 'pago') {
                    statusColor = "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
-                   statusLabel = "Liquidado";
+                   statusLabel = "Pago";
                  } else if (cost.status === 'vencendo') {
                    statusColor = "bg-amber-500/10 text-amber-500 border-amber-500/20";
-                   statusLabel = "Vencendo (7d)";
+                   statusLabel = "A Vencer";
                  } else if (cost.status === 'pendente' || cost.status === 'em aberto') {
                    statusColor = "bg-muted text-muted-foreground border-border";
                    statusLabel = "Em Aberto";
                  } else {
                     statusColor = "bg-destructive/10 text-destructive border-destructive/20";
-                    statusLabel = "Atrasado";
+                    statusLabel = "Vencido";
                  }
 
                 return (
-                  <tr key={cost.id} className="hover:bg-muted/30 transition-colors group">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-3">
-                        <CalendarIcon className="w-4 h-4 text-muted-foreground" />
-                        <span className="font-mono text-xs tracking-wide text-foreground uppercase">{format(new Date(cost.date), "dd MMM, yyyy", { locale: ptBR })}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
+                  <tr key={cost.id} className="hover:bg-muted/40 transition-colors group">
+                    <td className="px-6 py-3 whitespace-nowrap">
                       <div className="flex flex-col gap-1">
+                        <span className="font-mono text-[11px] font-bold text-foreground">
+                           V: {format(new Date(cost.date), "dd/MM/yyyy", { locale: ptBR })}
+                        </span>
+                        <span className="font-mono text-[10px] text-muted-foreground">
+                           P: {cost.status === 'pago' ? format(new Date(cost.date), "dd/MM/yyyy", { locale: ptBR }) : '--/--/----'}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-3">
+                      <div className="flex flex-col gap-0.5">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium text-sm text-foreground tracking-tight">{cost.summary}</span>
-                          {cost.recurrence && <div title="Despesa Recorrente"><Repeat className="w-3.5 h-3.5 text-primary" /></div>}
+                           <span className="font-bold text-[13px] text-foreground tracking-tight">{cost.summary}</span>
+                           {cost.recurrence && <div title="Recorrente"><Repeat className="w-3.5 h-3.5 text-sky-500" /></div>}
                         </div>
-                        <span className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">{cost.category}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                       <div className="flex flex-col gap-1.5 items-start">
-                        <span className="text-[11px] font-medium text-muted-foreground">{cost.type}</span>
-                        <span className="text-[10px] uppercase font-semibold text-muted-foreground bg-muted border border-border px-1.5 py-0.5 rounded">{cost.store}</span>
+                    <td className="px-6 py-3">
+                      <div className="flex items-center gap-2">
+                         <span className="px-2 py-0.5 bg-muted text-muted-foreground text-[10px] uppercase font-bold tracking-wider rounded border border-border">
+                            {cost.category}
+                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-right">
-                       <span className="font-mono text-sm font-semibold text-foreground tracking-tight tabular-nums">{formatCurrency(cost.value)}</span>
+                    <td className="px-6 py-3">
+                       <div className="flex flex-col gap-1 items-start">
+                        <span className="text-[10px] uppercase font-bold text-foreground bg-muted/50 border border-border px-1.5 py-0.5 rounded shadow-sm">{cost.store}</span>
+                        <span className="text-[10px] font-semibold text-muted-foreground">{cost.type === 'Custo Fixo' ? 'Fixo' : 'Variável'}</span>
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-3 text-right">
+                       <span className="font-mono text-[13px] font-bold text-foreground tracking-tight tabular-nums">{formatCurrency(cost.value)}</span>
+                    </td>
+                    <td className="px-6 py-3 text-right">
                        <span className={cn(
-                        "inline-flex items-center px-2 py-1 rounded-md text-[10px] font-semibold uppercase tracking-wider border",
+                        "inline-flex items-center px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border",
                         statusColor
                       )}>
                         {statusLabel}
                       </span>
                     </td>
-                    <td className="px-5 py-4 text-right">
+                    <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {cost.status !== 'pago' && (
-                          <button className="text-[10px] uppercase font-semibold tracking-wider text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 px-2.5 py-1.5 rounded-md transition-colors flex items-center gap-1.5 active:scale-95 shadow-sm">
-                            <Check className="w-3.5 h-3.5" />
-                            Baixar
-                          </button>
-                        )}
-                        <button onClick={() => setCostToDelete(cost)} className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors" title="Excluir">
+                        <button onClick={() => setCostToDelete(cost)} className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors" title="Opções">
                            <MoreHorizontal className="w-4 h-4" />
                         </button>
                       </div>
@@ -162,7 +189,9 @@ export function BusinessCostsView() {
         </div>
       </Card>
 
-      <Drawer isOpen={isNewExpenseOpen} onClose={() => setIsNewExpenseOpen(false)} title="Nova Despesa">
+      {/* DRAWERS */}
+      <Drawer isOpen={isNewExpenseOpen} onClose={() => setIsNewExpenseOpen(false)} title="Nova Conta a Pagar">
+         {/* Drawer content remains similar but restyled */}
          <div className="space-y-4">
            <div>
              <label className="text-sm text-foreground mb-1 block">Descrição</label>
