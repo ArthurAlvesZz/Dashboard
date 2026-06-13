@@ -1,10 +1,30 @@
 "use client";
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { DELIVERIES } from "@/lib/mockData";
+import { DataTable } from "@/components/shared/DataTable";
+import { formatCurrency, formatDate, getStatusColor, getStatusLabel } from "@/lib/utils";
 
 export function DeliveriesView() {
+  const columns = [
+    { key: "id", label: "ID Entrega", sortable: true, render: (d: any) => <span className="font-mono text-xs">{d.id.toUpperCase()}</span> },
+    { key: "saleId", label: "Pedido", sortable: true, render: (d: any) => <span className="font-mono text-xs font-semibold text-primary">{d.saleId.toUpperCase()}</span> },
+    { key: "carrier", label: "Transportadora", sortable: true },
+    { key: "tracking", label: "Rastreio", sortable: true, render: (d: any) => <span className="font-mono text-xs">{d.tracking}</span> },
+    { key: "estimatedDate", label: "Previsão", sortable: true, render: (d: any) => formatDate(d.estimatedDate) },
+    { 
+      key: "status", 
+      label: "Status", 
+      sortable: true,
+      render: (d: any) => (
+        <Badge variant="outline" className={getStatusColor(d.status)}>
+          {getStatusLabel(d.status)}
+        </Badge>
+      )
+    },
+    { key: "cost", label: "Custo", sortable: true, render: (d: any) => formatCurrency(d.cost) }
+  ];
+
   return (
     <div className="space-y-6">
       <div>
@@ -12,38 +32,12 @@ export function DeliveriesView() {
         <p className="text-muted-foreground">Gestão de logística e rastreio de envios.</p>
       </div>
 
-      <div className="rounded-md border border-border bg-card">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Entrega ID</TableHead>
-              <TableHead>Pedido</TableHead>
-              <TableHead>Transportadora</TableHead>
-              <TableHead>Rastreio</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Custo</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {DELIVERIES.map((d) => (
-              <TableRow key={d.id}>
-                <TableCell className="font-medium">{d.id}</TableCell>
-                <TableCell>{d.saleId}</TableCell>
-                <TableCell>{d.carrier}</TableCell>
-                <TableCell className="font-mono text-xs">{d.tracking}</TableCell>
-                <TableCell>
-                  <Badge variant={d.status === 'delivered' ? 'default' : 'secondary'}>
-                    {d.status === 'delivered' ? 'Entregue' : 'Em Trânsito'}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  R$ {d.cost.toFixed(2).replace('.', ',')}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <DataTable 
+        data={DELIVERIES} 
+        columns={columns} 
+        searchKey="tracking" 
+        searchPlaceholder="Buscar por rastreio..." 
+      />
     </div>
   );
 }

@@ -1,11 +1,40 @@
 "use client";
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PRODUCTS } from "@/lib/mockData";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { DataTable } from "@/components/shared/DataTable";
+import { Badge } from "@/components/ui/badge";
+import { formatCurrency, formatPercent, getStatusColor, getStatusLabel } from "@/lib/utils";
 
 export function ProductsView() {
+  const columns = [
+    { key: "sku", label: "SKU", sortable: true, render: (p: any) => <span className="font-mono text-xs">{p.sku}</span> },
+    { key: "name", label: "Nome Produto", sortable: true },
+    { key: "variation", label: "Variação", sortable: true },
+    { key: "stock", label: "Estoque", sortable: true, render: (p: any) => `${p.stock} un` },
+    { key: "cost", label: "Custo Un.", sortable: true, render: (p: any) => formatCurrency(p.cost) },
+    { key: "price", label: "Preço Venda", sortable: true, render: (p: any) => formatCurrency(p.price) },
+    { 
+      key: "margin", 
+      label: "Margem", 
+      render: (p: any) => {
+        const marginPercent = ((p.price - p.cost) / p.price) * 100;
+        return <span className={marginPercent > 40 ? "text-green-500" : "text-yellow-500"}>{formatPercent(marginPercent)}</span>;
+      } 
+    },
+    { 
+      key: "status", 
+      label: "Status", 
+      sortable: true,
+      render: (p: any) => (
+        <Badge variant="outline" className={getStatusColor(p.status)}>
+          {getStatusLabel(p.status)}
+        </Badge>
+      )
+    }
+  ];
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -18,38 +47,12 @@ export function ProductsView() {
         </Button>
       </div>
 
-      <div className="rounded-md border border-border bg-card">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>SKU</TableHead>
-              <TableHead>Nome</TableHead>
-              <TableHead className="text-right">Estoque</TableHead>
-              <TableHead className="text-right">Custo Un.</TableHead>
-              <TableHead className="text-right">Preço Venda</TableHead>
-              <TableHead className="text-right">Margem Bruta</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {PRODUCTS.map((p) => {
-              const margin = p.price - p.cost;
-              const marginPercent = ((margin / p.price) * 100).toFixed(1);
-              return (
-                <TableRow key={p.id}>
-                  <TableCell className="font-medium font-mono text-xs">{p.sku}</TableCell>
-                  <TableCell>{p.name}</TableCell>
-                  <TableCell className="text-right">{p.stock} un</TableCell>
-                  <TableCell className="text-right">R$ {p.cost.toFixed(2).replace('.', ',')}</TableCell>
-                  <TableCell className="text-right">R$ {p.price.toFixed(2).replace('.', ',')}</TableCell>
-                  <TableCell className="text-right text-green-500">
-                    {marginPercent}%
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </div>
+      <DataTable 
+        data={PRODUCTS} 
+        columns={columns} 
+        searchKey="name" 
+        searchPlaceholder="Buscar por nome do produto..." 
+      />
     </div>
   );
 }
