@@ -8,6 +8,8 @@ import { Drawer } from '@/components/ui/Drawer';
 import { useToast } from '@/components/ui/Toast';
 import { useStore } from '@/contexts/StoreContext';
 
+import { toast } from 'sonner';
+
 export function BusinessCostsView() {
   const { selectedStore } = useStore();
   const [searchTerm, setSearchTerm] = useState('');
@@ -17,8 +19,11 @@ export function BusinessCostsView() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { showToast } = useToast();
 
+  const [costs, setCosts] = useState(mockBusinessCosts);
+  const [newCost, setNewCost] = useState({ summary: '', category: 'Infraestrutura', value: '', store: 'Araguari', type: 'Fixo' as 'Fixo' | 'Variável' });
+
   const filtered = useMemo(() => {
-    let data = filterByStore(mockBusinessCosts, selectedStore);
+    let data = filterByStore(costs, selectedStore);
     if (searchTerm) {
       const q = searchTerm.toLowerCase();
       data = data.filter(c => c.summary.toLowerCase().includes(q) || c.category.toLowerCase().includes(q) || c.store.toLowerCase().includes(q));
@@ -124,29 +129,29 @@ export function BusinessCostsView() {
           <div className="grid gap-4">
             <div>
               <label className="mb-1.5 block text-sm font-medium">Descrição</label>
-              <input type="text" defaultValue={selectedCost?.summary} className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary" />
+              <input type="text" value={newCost.summary} onChange={(e) => setNewCost({ ...newCost, summary: e.target.value })} className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="mb-1.5 block text-sm font-medium">Data Vencimento</label>
-                <input type="date" defaultValue={selectedCost?.date?.slice(0, 10)} className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary" />
+                <input type="date" defaultValue={new Date().toISOString().slice(0, 10)} className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary" />
               </div>
               <div>
                 <label className="mb-1.5 block text-sm font-medium">Valor (R$)</label>
-                <input type="number" defaultValue={selectedCost?.value} className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary" />
+                <input type="number" value={newCost.value} onChange={(e) => setNewCost({ ...newCost, value: e.target.value })} className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="mb-1.5 block text-sm font-medium">Categoria</label>
-                <input type="text" defaultValue={selectedCost?.category} className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary" />
+                <input type="text" value={newCost.category} onChange={(e) => setNewCost({ ...newCost, category: e.target.value })} className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary" />
               </div>
               <div>
                 <label className="mb-1.5 block text-sm font-medium">Loja</label>
-                <select defaultValue={selectedCost?.storeId} className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary">
-                  <option value="all">Todas as Lojas</option>
-                  <option value="araguari">Araguari</option>
-                  <option value="uberlandia">Uberlândia</option>
+                <select value={newCost.store} onChange={(e) => setNewCost({ ...newCost, store: e.target.value })} className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary">
+                  <option value="Todas">Todas as Lojas</option>
+                  <option value="Araguari">Araguari</option>
+                  <option value="Uberlândia">Uberlândia</option>
                 </select>
               </div>
             </div>
@@ -154,7 +159,28 @@ export function BusinessCostsView() {
           
           <div className="pt-6 border-t border-border flex justify-end gap-3">
              <button onClick={() => setIsDrawerOpen(false)} className="px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted rounded-md transition-colors">Cancelar</button>
-             <button onClick={handleSave} className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">{selectedCost ? 'Salvar Custo' : 'Lançar Custo'}</button>
+             <button onClick={() => {
+                if (!newCost.summary || !newCost.value) {
+                  toast.error('Preencha nome e valor da despesa');
+                  return;
+                }
+                const item = {
+                  id: String(costs.length + 1),
+                  date: new Date().toISOString(),
+                  summary: newCost.summary,
+                  category: newCost.category,
+                  type: newCost.type,
+                  store: newCost.store,
+                  storeId: newCost.store === 'Todas' ? 'all' : newCost.store.toLowerCase().replace('ê', 'e').replace('â', 'a'),
+                  value: parseFloat(newCost.value),
+                  status: 'pendente' as const,
+                  recurrence: false,
+                };
+                setCosts([item, ...costs]);
+                setNewCost({ summary: '', category: 'Infraestrutura', value: '', store: 'Araguari', type: 'Fixo' });
+                setIsDrawerOpen(false);
+                toast.success('Despesa salva com sucesso');
+             }} className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">{selectedCost ? 'Salvar Custo' : 'Lançar Custo'}</button>
           </div>
         </div>
       </Drawer>

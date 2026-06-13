@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { StoreProvider } from "@/contexts/StoreContext";
 import { ToastProvider } from "@/components/ui/Toast";
+import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains" });
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <StoreProvider>
           <ToastProvider>
             {children}
+            <Toaster theme="dark" position="bottom-right" />
           </ToastProvider>
         </StoreProvider>
       </body>

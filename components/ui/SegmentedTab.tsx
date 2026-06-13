@@ -1,25 +1,33 @@
 'use client';
-import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 interface SegmentedTabProps {
   options: { id: string; label: string }[];
-  value: string;
-  onChange: (id: string) => void;
+  defaultValue?: string;
+  onChange?: (id: string) => void;
 }
 
-export function SegmentedTab({ options, value, onChange }: SegmentedTabProps) {
+export function SegmentedTab({ options, defaultValue, onChange }: SegmentedTabProps) {
+  const [active, setActive] = useState(defaultValue || options[0]?.id);
+
+  const handleSelect = (id: string) => {
+    setActive(id);
+    onChange?.(id);
+  };
+
   return (
-    <div className="flex bg-muted/50 p-1 rounded-lg w-fit">
-      {options.map(option => (
+    <div className="flex items-center gap-1 rounded-lg bg-muted p-0.5 shadow-sm">
+      {options.map(opt => (
         <button
-          key={option.id}
-          onClick={() => onChange(option.id)}
-          className={cn(
-            "relative px-4 py-1.5 text-sm font-medium rounded-md transition-all duration-300",
-            value === option.id ? "bg-background shadow-sm text-foreground border border-border" : "text-muted-foreground hover:text-foreground border border-transparent"
-          )}
+          key={opt.id}
+          onClick={() => handleSelect(opt.id)}
+          className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+            active === opt.id
+              ? 'bg-background text-foreground shadow-sm'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
         >
-          {option.label}
+          {opt.label}
         </button>
       ))}
     </div>

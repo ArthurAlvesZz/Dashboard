@@ -2,6 +2,7 @@
 
 import { Download, FileBarChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SegmentedTab } from "@/components/ui/SegmentedTab";
 
 export function ReportsView() {
   const reports = [
@@ -14,9 +15,18 @@ export function ReportsView() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">Relatórios</h2>
-        <p className="text-muted-foreground">Exportação e gráficos analíticos.</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Relatórios</h2>
+          <p className="text-muted-foreground">Exportação e gráficos analíticos.</p>
+        </div>
+        <SegmentedTab 
+          options={[
+            { id: 'resumo', label: 'Resumo' },
+            { id: 'detalhado', label: 'Detalhado' },
+          ]}
+          defaultValue="resumo"
+        />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

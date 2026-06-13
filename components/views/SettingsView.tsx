@@ -2,6 +2,7 @@
 
 import { Settings as SettingsIcon, UserCircle, Users, Bell, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SegmentedTab } from "@/components/ui/SegmentedTab";
 
 export function SettingsView() {
   const sections = [
@@ -13,9 +14,18 @@ export function SettingsView() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">Configurações</h2>
-        <p className="text-muted-foreground">Gerencie equipe e permissões da plataforma.</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Configurações</h2>
+          <p className="text-muted-foreground">Gerencie equipe e permissões da plataforma.</p>
+        </div>
+        <SegmentedTab 
+          options={[
+            { id: 'loja', label: 'Loja' },
+            { id: 'global', label: 'Global' },
+          ]}
+          defaultValue="loja"
+        />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">

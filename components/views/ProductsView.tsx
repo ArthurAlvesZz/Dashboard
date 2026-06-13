@@ -7,6 +7,8 @@ import { Search, Plus, Filter } from 'lucide-react';
 import { Drawer } from '@/components/ui/Drawer';
 import { useToast } from '@/components/ui/Toast';
 
+import { toast } from 'sonner';
+
 export function ProductsView() {
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
@@ -14,8 +16,11 @@ export function ProductsView() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { showToast } = useToast();
 
+  const [products, setProducts] = useState(mockProducts);
+  const [newProduct, setNewProduct] = useState({ name: '', sku: '', pixPrice: '', cardPrice: '', cost: '' });
+
   const filtered = useMemo(() => {
-    let data = mockProducts;
+    let data = products;
     if (searchTerm) {
       const q = searchTerm.toLowerCase();
       data = data.filter(p => p.sku.toLowerCase().includes(q) || p.name.toLowerCase().includes(q) || p.variation.toLowerCase().includes(q));
@@ -122,33 +127,53 @@ export function ProductsView() {
           <div className="grid gap-4">
             <div>
               <label className="mb-1.5 block text-sm font-medium">Nome do Produto</label>
-              <input type="text" defaultValue={selectedProduct?.name} className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary" />
+              <input type="text" value={newProduct.name} onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })} className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="mb-1.5 block text-sm font-medium">SKU</label>
-                <input type="text" defaultValue={selectedProduct?.sku} className="font-mono text-xs h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary" />
+                <input type="text" value={newProduct.sku} onChange={(e) => setNewProduct({ ...newProduct, sku: e.target.value })} className="font-mono text-xs h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary" />
               </div>
               <div>
-                <label className="mb-1.5 block text-sm font-medium">Variação</label>
-                <input type="text" defaultValue={selectedProduct?.variation} className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary" />
+                <label className="mb-1.5 block text-sm font-medium">Preço Pix / Cartão (R$)</label>
+                <input type="number" value={newProduct.pixPrice} onChange={(e) => setNewProduct({ ...newProduct, pixPrice: e.target.value, cardPrice: e.target.value })} className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary" />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-4">
               <div>
                 <label className="mb-1.5 block text-sm font-medium">Custo Unitário (R$)</label>
-                <input type="number" defaultValue={selectedProduct?.cost} className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary" />
-              </div>
-              <div>
-                <label className="mb-1.5 block text-sm font-medium">Preço (R$)</label>
-                <input type="number" defaultValue={selectedProduct?.cardPrice} className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary" />
+                <input type="number" value={newProduct.cost} onChange={(e) => setNewProduct({ ...newProduct, cost: e.target.value })} className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary" />
               </div>
             </div>
           </div>
           
           <div className="pt-6 border-t border-border flex justify-end gap-3">
              <button onClick={() => setIsDrawerOpen(false)} className="px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted rounded-md transition-colors">Cancelar</button>
-             <button onClick={handleSave} className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">Salvar Alterações</button>
+             <button onClick={() => {
+                if (!newProduct.name || !newProduct.sku) {
+                  toast.error('Preencha nome e SKU do produto');
+                  return;
+                }
+                const item = {
+                  id: String(products.length + 1),
+                  sku: newProduct.sku,
+                  name: newProduct.name,
+                  variation: 'Único',
+                  image: `https://picsum.photos/seed/${newProduct.sku}/200`,
+                  pixPrice: parseFloat(newProduct.pixPrice) || 0,
+                  cardPrice: parseFloat(newProduct.cardPrice) || 0,
+                  cost: parseFloat(newProduct.cost) || 0,
+                  margin: newProduct.cost ? `${(((parseFloat(newProduct.pixPrice) - parseFloat(newProduct.cost)) / parseFloat(newProduct.pixPrice)) * 100).toFixed(0)}%` : '0%',
+                  origin: 'Manual',
+                  lastUpdate: 'Agora',
+                  status: 'ok' as const,
+                  stock: 0,
+                };
+                setProducts([item, ...products]);
+                setNewProduct({ name: '', sku: '', pixPrice: '', cardPrice: '', cost: '' });
+                setIsDrawerOpen(false);
+                toast.success('Produto salvo com sucesso');
+             }} className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">Salvar Alterações</button>
           </div>
         </div>
       </Drawer>
