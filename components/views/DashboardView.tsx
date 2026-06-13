@@ -167,7 +167,7 @@ export function DashboardView() {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={11} />
+                <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={11} />
                 <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickFormatter={(v) => `R$${(v/1000).toFixed(0)}k`} />
                 <Tooltip 
                   contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
@@ -187,21 +187,49 @@ export function DashboardView() {
           </CardHeader>
           <CardContent className="flex-1 overflow-y-auto">
             <div className="space-y-4">
-              {mockGoals.map((g, i) => (
-                <div key={i} className="space-y-2">
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="font-medium">{g.name}</span>
-                    <span className="text-muted-foreground">{g.name.includes('Envios') ? g.target : formatCurrency(g.target as number)}</span>
-                  </div>
-                  <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-primary" 
-                      style={{ width: `${Math.min((Number(g.current) / Number(g.target)) * 100, 100)}%` }}
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground text-right">{g.name.includes('Envios') ? `${g.current} realizados` : `${formatCurrency(g.current as number)} alcançado`}</p>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="font-medium">Faturamento Estimado</span>
+                  <span className="text-muted-foreground">{formatCurrency(mockGoals.metaFaturamento)}</span>
                 </div>
-              ))}
+                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-primary" style={{ width: `${Math.min((mockGoals.faturamentoAtual / mockGoals.metaFaturamento) * 100, 100)}%` }} />
+                </div>
+                <p className="text-xs text-muted-foreground text-right">{formatCurrency(mockGoals.faturamentoAtual)} alcançado</p>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="font-medium">Teto Despesas Fixas</span>
+                  <span className="text-muted-foreground">{formatCurrency(mockGoals.tetoDespesasFixas)}</span>
+                </div>
+                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-destructive" style={{ width: `${Math.min((mockGoals.despesasFixasAtuais / mockGoals.tetoDespesasFixas) * 100, 100)}%` }} />
+                </div>
+                <p className="text-xs text-muted-foreground text-right">{formatCurrency(mockGoals.despesasFixasAtuais)} registrado</p>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="font-medium">Meta Lucro</span>
+                  <span className="text-muted-foreground">{formatCurrency(mockGoals.metaLucro)}</span>
+                </div>
+                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-emerald-500" style={{ width: `${Math.min((mockGoals.lucroAtual / mockGoals.metaLucro) * 100, 100)}%` }} />
+                </div>
+                <p className="text-xs text-muted-foreground text-right">{formatCurrency(mockGoals.lucroAtual)} alcançado</p>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="font-medium">Capacidade Produtiva</span>
+                  <span className="text-muted-foreground">{mockGoals.capacidadeProdutiva} envios</span>
+                </div>
+                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-primary" style={{ width: `${Math.min((mockGoals.enviosRealizados / mockGoals.capacidadeProdutiva) * 100, 100)}%` }} />
+                </div>
+                <p className="text-xs text-muted-foreground text-right">{mockGoals.enviosRealizados} realizados</p>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -225,7 +253,7 @@ export function DashboardView() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {recentTransactions.map(t => (
+                {recentTransactions.slice(0, 5).map(t => (
                   <tr key={t.id} className="hover:bg-muted/50 transition-colors">
                     <td className="px-4 py-3">{new Date(t.date).toLocaleDateString()}</td>
                     <td className="px-4 py-3 font-medium">{t.summary}</td>
